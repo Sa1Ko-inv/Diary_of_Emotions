@@ -1,0 +1,216 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URI")
+}
+
+//
+// === ENUM'ы ===
+//
+
+// Возможные эмоции, которые можно выбрать в записи
+enum Emotion {
+  joy
+  sadness
+  anxiety
+  anger
+  calm
+  fear
+  love
+  disgust
+  surprise
+  shame
+  other
+}
+//
+// // Тип уведомления
+// enum NotificationCategory {
+//   reminder // Напоминание внести запись
+//   milestone // Достижение (например, 100 дней streak)
+//   encouragement // Поддерживающее сообщение
+// }
+//
+// // Канал уведомления
+// enum NotificationType {
+//   push
+//   email
+// }
+//
+// // Категория совета (пока не используется в интерфейсе)
+// enum AdviceCategory {
+//   general // Общий
+//   emotion // Связанный с эмоцией
+//   habit // Связанный с привычкой
+//   motivation // Мотивация
+// }
+
+//
+// === Таблицы ===
+//
+
+// Пользователь
+model User {
+  id        String   @id @default(uuid()) // Уникальный ID
+  email     String   @unique // Email
+  password  String // Хеш пароля
+  firstName String   @map("first_name") // Имя
+  lastName  String   @map("last_name") // Фамилия
+  birthDate DateTime @map("birth_date") // Дата рождения
+  createdAt DateTime @default(now()) // Дата регистрации
+  updatedAt DateTime @updatedAt // Дата последнего обновления
+
+  entries Entry[] // Эмоциональные записи
+
+  // streaks       Streak[] // Эмоциональные стрики
+  // cleanStreaks  CleanStreak[] // Счётчики отказа от привычек
+  // achievements  UserAchievement[] // Полученные ачивки
+  // notifications Notification[] // Уведомления
+  @@map("users") // Переименование таблицы в БД
+}
+
+// Эмоциональная запись
+model Entry {
+  id          String   @id @default(uuid()) // Уникальный ID записи
+  userId      String // Автор записи
+  date        DateTime @default(now()) // Дата создания
+  description String? // Комментарий к записи
+
+  user     User             @relation(fields: [userId], references: [id])
+  emotions EntryEmotion[] // Эмоции с интенсивностью
+  triggers TriggerOnEntry[] // Связанные триггеры
+
+  @@map("entries") // Переименование таблицы в БД
+}
+
+// Связь Entry ↔ Emotion (многие к многим, с интенсивностью)
+model EntryEmotion {
+  id        String  @id @default(uuid()) // Уникальный ID
+  entryId   String // К какой записи относится
+  emotion   Emotion // Название эмоции
+  intensity Int // От 1 до 10
+
+  entry Entry @relation(fields: [entryId], references: [id])
+
+  @@map("entry_emotions") // Переименование таблицы в БД
+}
+
+// Триггер — причина эмоции (например, "работа", "семья")
+model Trigger {
+  id        String  @id @default(uuid()) // Уникальный ID
+  label     String // Название триггера
+  createdBy String? // ID автора, если пользовательский
+
+  TriggerOnEntry TriggerOnEntry[] // Связанные записи
+
+  @@map("triggers") // Переименование таблицы в БД
+}
+
+// Связь Entry ↔ Trigger (многие ко многим)
+model TriggerOnEntry {
+  id        String @id @default(uuid()) // Уникальный ID
+  entryId   String
+  triggerId String
+
+  entry   Entry   @relation(fields: [entryId], references: [id])
+  trigger Trigger @relation(fields: [triggerId], references: [id])
+
+  @@map("entry_triggers") // Переименование таблицы в БД
+}
+//
+// // Эмоциональный стрик (записи с одинаковой эмоцией подряд)
+// model Streak {
+//   id         String    @id @default(uuid())                   // Уникальный ID
+//   userId     String
+//   startDate  DateTime                                        // Дата начала
+//   endDate    DateTime                                        // Дата окончания
+//   emotion    Emotion?                                        // С какой эмоцией связан
+//
+//   user       User      @relation(fields: [userId], references: [id])
+//
+//   @@map("streaks") // Переименование таблицы в БД
+// }
+//
+// // Ачивка — достижение в системе
+// model Achievement {
+//   id          String   @id @default(uuid())                   // Уникальный ID
+//   code        String   @unique                                // Машинное имя (напр. joy_master)
+//   title       String                                          // Название для пользователя
+//   description String                                          // Описание ачивки
+//   icon        String?                                         // Иконка (если есть)
+//
+//   users       UserAchievement[]                               // Связанные пользователи
+//
+//   @@map("achievements") // Переименование таблицы в БД
+// }
+//
+// // Связь пользователь ↔ полученная ачивка
+// model UserAchievement {
+//   id             String   @id @default(uuid())
+//   userId         String
+//   achievementId  String
+//   achievedAt     DateTime @default(now())                     // Когда получена
+//
+//   user           User        @relation(fields: [userId], references: [id])
+//   achievement    Achievement @relation(fields: [achievementId], references: [id])
+//
+//   @@map("user_achievements") // Переименование таблицы в БД
+// }
+//
+// // Уведомление (email или push)
+// model Notification {
+//   id           String              @id @default(uuid())        // Уникальный ID
+//   userId       String
+//   category     NotificationCategory                            // Тип уведомления
+//   type         NotificationType                                // Способ доставки
+//   message      String                                           // Текст сообщения
+//   sentAt       DateTime?                                       // Когда отправлено (null — в будущем)
+//   scheduledAt  DateTime                                        // Когда запланировано
+//   meta         Json?                                           // Доп. данные
+//
+//   user         User                @relation(fields: [userId], references: [id])
+//
+//   @@map("notifications") // Переименование таблицы в БД
+// }
+//
+// // Счётчик отказа от вредной привычки
+// model CleanStreak {
+//   id             String     @id @default(uuid())              // Уникальный ID
+//   userId         String
+//   goal           String                                       // Цель, которую задал пользователь (текст)
+//   startedAt      DateTime                                     // Когда начался streak
+//   brokenAt       DateTime?                                    // Когда прервался (если прерывался)
+//   isActive       Boolean    @default(true)                    // Статус streak'а
+//
+//   user           User       @relation(fields: [userId], references: [id])
+//   motivationalMessages CleanStreakMessage[]                   // Фразы поддержки
+//
+//   @@map("clean_streaks") // Переименование таблицы в БД
+// }
+//
+// // Мотивационные фразы под streak (меняются под счётчиком)
+// model CleanStreakMessage {
+//   id             String     @id @default(uuid())
+//   streakId       String
+//   text           String                                       // Текст мотивационной фразы
+//   order          Int?                                         // Очерёдность показа
+//
+//   streak         CleanStreak @relation(fields: [streakId], references: [id])
+//
+//   @@map("clean_streak_messages") // Переименование таблицы в БД
+// }
+//
+// // Таблица для хранения советов (не используется в UI, только в схеме)
+// model Advice {
+//   id          String          @id @default(uuid())             // Уникальный ID
+//   text        String                                           // Текст совета
+//   category    AdviceCategory                                   // Категория совета
+//   emotion     Emotion?                                         // Связанная эмоция (если есть)
+//   isVisible   Boolean          @default(true)                  // Видимость (можно скрывать)
+//   createdAt   DateTime         @default(now())                 // Дата добавления
+//
+//   @@map("advice") // Переименование таблицы в БД
+// }
