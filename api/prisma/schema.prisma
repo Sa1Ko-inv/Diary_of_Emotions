@@ -12,20 +12,6 @@ datasource db {
 // === ENUM'ы ===
 //
 
-// Возможные эмоции, которые можно выбрать в записи
-enum Emotion {
-  joy
-  sadness
-  anxiety
-  anger
-  calm
-  fear
-  love
-  disgust
-  surprise
-  shame
-  other
-}
 //
 // // Тип уведомления
 // enum NotificationCategory {
@@ -88,14 +74,38 @@ model Entry {
 
 // Связь Entry ↔ Emotion (многие к многим, с интенсивностью)
 model EntryEmotion {
-  id        String  @id @default(uuid()) // Уникальный ID
+  id        String @id @default(uuid()) // Уникальный ID
   entryId   String // К какой записи относится
-  emotion   Emotion // Название эмоции
+  emotionId String // FK на EmotionType
   intensity Int // От 1 до 10
 
-  entry Entry @relation(fields: [entryId], references: [id])
+  entry   Entry       @relation(fields: [entryId], references: [id])
+  emotion EmotionType @relation(fields: [emotionId], references: [id])
 
   @@map("entry_emotions") // Переименование таблицы в БД
+}
+
+// Основная группа эмоций (например, "Грусть", "Страх", "Радость")
+model EmotionGroup {
+  id    String  @id @default(uuid())
+  name  String // Название группы, напр. "Грусть"
+  color String? // HEX цвет (опционально для визуализации)
+
+  types EmotionType[] // Все подтипы в группе
+
+  @@map("emotion_groups") // Переименование таблицы в БД
+}
+
+// Подтип эмоции, связанный с группой
+model EmotionType {
+  id      String @id @default(uuid())
+  groupId String
+  name    String // Название подтипа, напр. "тоска"
+
+  group      EmotionGroup   @relation(fields: [groupId], references: [id])
+  entryLinks EntryEmotion[] // Все связи с записями
+
+  @@map("emotion_types") // Переименование таблицы в БД
 }
 
 // Триггер — причина эмоции (например, "работа", "семья")
@@ -120,6 +130,7 @@ model TriggerOnEntry {
 
   @@map("entry_triggers") // Переименование таблицы в БД
 }
+
 //
 // // Эмоциональный стрик (записи с одинаковой эмоцией подряд)
 // model Streak {

@@ -1,0 +1,19 @@
+import { PrismaClient } from '@prisma/client';
+import { seedEmotion } from './seeders/emotions';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  await seedEmotion(prisma);
+}
+
+main()
+  .then(() => {
+    console.log('Сид завршен.');
+    return prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error('Ошибка сидирования', e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
