@@ -8,7 +8,8 @@ import { UserResponseDto } from './dto/response-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {
+  }
 
   async create(dto: CreateUserDto): Promise<User> {
     const { email, password, firstName, lastName, birthDate } = dto;
@@ -52,11 +53,30 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+
+    const userUpdate = await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        email: dto.email || user.email,
+        password: dto.password || user.password,
+        firstName: dto.firstName || user.firstName,
+        lastName: dto.lastName || user.lastName,
+        birthDate: dto.birthDate || user.birthDate, // Ensure the date is stored correctly
+      },
+    });
+
+    return userUpdate;
   }
 
-  async remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user = await this.findOne(id);
+
+    await this.prismaService.user.delete({
+      where: { id: user.id },
+    });
+
+    return { message: `Пользователь с ID ${id} успешно удален` };
   }
 }
