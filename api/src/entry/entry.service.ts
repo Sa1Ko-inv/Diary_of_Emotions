@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class EntryService {
   constructor(private readonly prismaService: PrismaService) {}
+
   // TODO разобраться как работает создание записи
   async create(userId: string, dto: CreateEntryDto): Promise<Entry> {
     const { date, description, emotions, triggers } = dto;
@@ -39,12 +40,14 @@ export class EntryService {
               });
 
               // Если триггер не существует, создаем с оригинальным label
-              const trigger = existing ?? await this.prismaService.trigger.create({
-                data: {
-                  label: label, // Сохраняем оригинальный label для отображения
-                  createdBy: userId,
-                },
-              });
+              const trigger =
+                existing ??
+                (await this.prismaService.trigger.create({
+                  data: {
+                    label: label, // Сохраняем оригинальный label для отображения
+                    createdBy: userId,
+                  },
+                }));
 
               return {
                 trigger: {
@@ -76,7 +79,29 @@ export class EntryService {
   }
 
   findAll() {
-    return `This action returns all entry`;
+    const entries = this.prismaService.entry.findMany({
+      orderBy: {
+        date: 'desc',
+      },
+      include: {
+        emotions: {
+          include: {
+            emotion: {
+              include: {
+                group: true,
+              },
+            },
+          },
+        },
+        triggers: {
+          include: {
+            trigger: true,
+          },
+        },
+      },
+    });
+
+    return entries;
   }
 
   findOne(id: number) {
