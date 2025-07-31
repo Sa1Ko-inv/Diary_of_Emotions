@@ -9,7 +9,7 @@ export class EntryController {
 
   @Post()
   create(@Body() dto: CreateEntryDto) {
-    const testUserId = '9e276430-06b1-44c0-b02c-c5d2e94dbeec';
+    const testUserId = '20a26622-6067-4ff2-8d5c-30012843af94';
     return this.entryService.create(testUserId, dto);
   }
 
@@ -25,7 +25,7 @@ export class EntryController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEntryDto: UpdateEntryDto) {
-    return this.entryService.update(+id, updateEntryDto);
+    return this.entryService.update(id, updateEntryDto);
   }
 
   @Delete(':id')

@@ -138,8 +138,99 @@ export class EntryService {
     return entry;
   }
 
-  update(id: number, updateEntryDto: UpdateEntryDto) {
-    return `This action updates a #${id} entry`;
+  async update(id: string, dto: UpdateEntryDto): Promise<Entry> {
+    // Проверяем, существует ли запись
+    const entry = await this.findOne(id);
+
+    const { date, description, emotions, triggers } = dto;
+
+    // Подготавливаем данные для обновления
+    const updateData: any = {
+      ...(date && { date: new Date(date) }),
+      ...(description !== undefined && { description }),
+    };
+
+    // Подготавливаем данные для эмоций
+    const emotionsData = emotions
+      ? {
+        // Удаляем старые связи с эмоциями
+        deleteMany: { entryId: id },
+        // Создаем новые связи
+        create: emotions.map((emotion) => ({
+          emotion: {
+            connect: { id: emotion.emotionTypeId },
+          },
+          intensity: emotion.intensity,
+        })),
+      }
+      : {};
+
+    // Подготавливаем данные для триггеров
+    const triggersData = triggers
+      ? {
+        // Удаляем старые связи с триггерами
+        deleteMany: { entryId: id },
+        // Создаем новые связи
+        create: await Promise.all(
+          triggers.map(async (label) => {
+            // Нормализуем label, приводя к нижнему регистру
+            const normalizedLabel = label.trim().toLowerCase();
+
+            // Ищем существующий триггер
+            const existing = await this.prismaService.trigger.findFirst({
+              where: {
+                label: { equals: normalizedLabel, mode: 'insensitive' },
+                OR: [{ createdBy: null }, { createdBy: entry.userId }],
+              },
+            });
+
+            // Если триггер не существует, создаем новый
+            const trigger =
+              existing ??
+              (await this.prismaService.trigger.create({
+                data: {
+                  label, // Сохраняем оригинальный label
+                  createdBy: entry.userId,
+                },
+              }));
+
+            return {
+              trigger: {
+                connect: { id: trigger.id },
+              },
+            };
+          })
+        ),
+      }
+      : {};
+
+    // Выполняем обновление записи
+    const updatedEntry = await this.prismaService.entry.update({
+      where: { id },
+      data: {
+        ...updateData,
+        emotions: emotionsData,
+        triggers: triggersData,
+      },
+      include: {
+        emotions: {
+          include: {
+            emotion: {
+              include: {
+                group: true,
+              },
+            },
+          },
+        },
+        triggers: {
+          include: {
+            trigger: true,
+          },
+        },
+      },
+    });
+
+    return updatedEntry;
   }
 
   remove(id: number) {
