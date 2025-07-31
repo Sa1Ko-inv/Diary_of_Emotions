@@ -104,8 +104,38 @@ export class EntryService {
     return entries;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} entry`;
+  // TODO доделать, update, remove
+  async findOne(id: string): Promise<Entry> {
+    const entry = await this.prismaService.entry.findUnique({
+      where: { id },
+      include: {
+        emotions: {
+          include: {
+            emotion: {
+              include: {
+                group: true,
+              },
+            },
+          },
+        },
+        triggers: {
+          include: {
+            trigger: {
+              select: {
+                id: true,
+                label: true,
+                createdBy: true,
+              },
+            }
+          },
+        },
+      },
+    });
+    if (!entry) {
+      throw new NotFoundException(`Заметка с таким ${id} не найдена`);
+    }
+
+    return entry;
   }
 
   update(id: number, updateEntryDto: UpdateEntryDto) {

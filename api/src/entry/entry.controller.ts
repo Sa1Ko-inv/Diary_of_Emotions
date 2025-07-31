@@ -20,7 +20,7 @@ export class EntryController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.entryService.findOne(+id);
+    return this.entryService.findOne(id);
   }
 
   @Patch(':id')
