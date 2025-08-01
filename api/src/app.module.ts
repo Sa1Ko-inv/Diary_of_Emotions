@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { EntryModule } from './entry/entry.module';
+import { TriggerModule } from './trigger/trigger.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EntryModule } from './entry/entry.module';
     PrismaModule,
     UserModule,
     EntryModule,
+    TriggerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -57,7 +57,7 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new Error(`Пользователь с ID ${id} не найден`);
+      throw new NotFoundException(`Пользователь с ID ${id} не найден`);
     }
     return plainToInstance(UserResponseDto, user);
   }

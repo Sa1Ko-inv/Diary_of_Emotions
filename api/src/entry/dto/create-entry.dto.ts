@@ -16,8 +16,8 @@ class EmotionItemDto {
   emotionTypeId: string;
 
   @IsInt()
-  @Min(1)
-  @Max(10)
+  @Min(1, { message: 'Оценка должна быть не менее 1' })
+  @Max(10, { message: 'Оценка должна быть не более 10' })
   intensity: number;
 }
 
