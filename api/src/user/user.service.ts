@@ -43,14 +43,23 @@ export class UserService {
     return plainToInstance(UserResponseDto, user);
   }
 
-  async findOne(id: string): Promise<User> {
+  async findOne(id: string) {
     const user = await this.prismaService.user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        email: true,
+        // password: true,
+        firstName: true,
+        lastName: true,
+        birthDate: true,
+        createdAt: true,
+      },
     });
     if (!user) {
       throw new Error(`Пользователь с ID ${id} не найден`);
     }
-    return user;
+    return plainToInstance(UserResponseDto, user);
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {

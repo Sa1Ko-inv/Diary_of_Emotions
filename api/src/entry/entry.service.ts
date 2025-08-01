@@ -3,6 +3,8 @@ import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
 import { Entry, EntryEmotion } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { plainToInstance } from 'class-transformer';
+import { EntryResponseDto } from './dto/response-entry.dto';
 
 @Injectable()
 export class EntryService {
@@ -101,11 +103,10 @@ export class EntryService {
       },
     });
 
-    return entries;
+    return plainToInstance(EntryResponseDto, entries);
   }
 
-  // TODO доделать, update, remove
-  async findOne(id: string): Promise<Entry> {
+  async findOne(id: string) {
     const entry = await this.prismaService.entry.findUnique({
       where: { id },
       include: {
@@ -135,7 +136,7 @@ export class EntryService {
       throw new NotFoundException(`Заметка с таким ${id} не найдена`);
     }
 
-    return entry;
+    return plainToInstance(EntryResponseDto, entry);
   }
 
   async update(id: string, dto: UpdateEntryDto): Promise<Entry> {
@@ -233,7 +234,6 @@ export class EntryService {
     return updatedEntry;
   }
 
-  // TODO: разобраться с каскадным удалением
   async remove(id: string) {
     const entry = await this.findOne(id);
 

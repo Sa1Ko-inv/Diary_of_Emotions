@@ -9,6 +9,9 @@ export class UserResponseDto {
   email: string;
 
   @Expose()
+  password: string;
+
+  @Expose()
   firstName: string;
 
   @Expose()
