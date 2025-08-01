@@ -9,7 +9,8 @@ export class EntryController {
 
   @Post()
   create(@Body() dto: CreateEntryDto) {
-    const testUserId = '20a26622-6067-4ff2-8d5c-30012843af94';
+    // TODO: заменить на получение ID пользователя из запроса
+    const testUserId = '5494bb47-e586-4272-9f3f-b5db6b19bde9';
     return this.entryService.create(testUserId, dto);
   }
 
@@ -30,6 +31,6 @@ export class EntryController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.entryService.remove(+id);
+    return this.entryService.remove(id);
   }
 }

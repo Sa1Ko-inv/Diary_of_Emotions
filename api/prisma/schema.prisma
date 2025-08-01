@@ -65,7 +65,7 @@ model Entry {
   date        DateTime @default(now()) // Дата создания
   description String? // Комментарий к записи
 
-  user     User             @relation(fields: [userId], references: [id])
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   emotions EntryEmotion[] // Эмоции с интенсивностью
   triggers TriggerOnEntry[] // Связанные триггеры
 
@@ -79,7 +79,7 @@ model EntryEmotion {
   emotionId String // FK на EmotionType
   intensity Int // От 1 до 10
 
-  entry   Entry       @relation(fields: [entryId], references: [id])
+  entry   Entry       @relation(fields: [entryId], references: [id], onDelete: Cascade)
   emotion EmotionType @relation(fields: [emotionId], references: [id])
 
   @@map("entry_emotions") // Переименование таблицы в БД
@@ -125,7 +125,7 @@ model TriggerOnEntry {
   entryId   String
   triggerId String
 
-  entry   Entry   @relation(fields: [entryId], references: [id])
+  entry   Entry   @relation(fields: [entryId], references: [id], onDelete: Cascade)
   trigger Trigger @relation(fields: [triggerId], references: [id])
 
   @@map("entry_triggers") // Переименование таблицы в БД

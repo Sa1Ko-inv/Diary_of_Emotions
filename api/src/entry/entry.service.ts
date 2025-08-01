@@ -126,7 +126,7 @@ export class EntryService {
                 label: true,
                 createdBy: true,
               },
-            }
+            },
           },
         },
       },
@@ -153,55 +153,55 @@ export class EntryService {
     // Подготавливаем данные для эмоций
     const emotionsData = emotions
       ? {
-        // Удаляем старые связи с эмоциями
-        deleteMany: { entryId: id },
-        // Создаем новые связи
-        create: emotions.map((emotion) => ({
-          emotion: {
-            connect: { id: emotion.emotionTypeId },
-          },
-          intensity: emotion.intensity,
-        })),
-      }
+          // Удаляем старые связи с эмоциями
+          deleteMany: { entryId: id },
+          // Создаем новые связи
+          create: emotions.map((emotion) => ({
+            emotion: {
+              connect: { id: emotion.emotionTypeId },
+            },
+            intensity: emotion.intensity,
+          })),
+        }
       : {};
 
     // Подготавливаем данные для триггеров
     const triggersData = triggers
       ? {
-        // Удаляем старые связи с триггерами
-        deleteMany: { entryId: id },
-        // Создаем новые связи
-        create: await Promise.all(
-          triggers.map(async (label) => {
-            // Нормализуем label, приводя к нижнему регистру
-            const normalizedLabel = label.trim().toLowerCase();
+          // Удаляем старые связи с триггерами
+          deleteMany: { entryId: id },
+          // Создаем новые связи
+          create: await Promise.all(
+            triggers.map(async (label) => {
+              // Нормализуем label, приводя к нижнему регистру
+              const normalizedLabel = label.trim().toLowerCase();
 
-            // Ищем существующий триггер
-            const existing = await this.prismaService.trigger.findFirst({
-              where: {
-                label: { equals: normalizedLabel, mode: 'insensitive' },
-                OR: [{ createdBy: null }, { createdBy: entry.userId }],
-              },
-            });
-
-            // Если триггер не существует, создаем новый
-            const trigger =
-              existing ??
-              (await this.prismaService.trigger.create({
-                data: {
-                  label, // Сохраняем оригинальный label
-                  createdBy: entry.userId,
+              // Ищем существующий триггер
+              const existing = await this.prismaService.trigger.findFirst({
+                where: {
+                  label: { equals: normalizedLabel, mode: 'insensitive' },
+                  OR: [{ createdBy: null }, { createdBy: entry.userId }],
                 },
-              }));
+              });
 
-            return {
-              trigger: {
-                connect: { id: trigger.id },
-              },
-            };
-          })
-        ),
-      }
+              // Если триггер не существует, создаем новый
+              const trigger =
+                existing ??
+                (await this.prismaService.trigger.create({
+                  data: {
+                    label, // Сохраняем оригинальный label
+                    createdBy: entry.userId,
+                  },
+                }));
+
+              return {
+                trigger: {
+                  connect: { id: trigger.id },
+                },
+              };
+            })
+          ),
+        }
       : {};
 
     // Выполняем обновление записи
@@ -233,7 +233,13 @@ export class EntryService {
     return updatedEntry;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} entry`;
+  // TODO: разобраться с каскадным удалением
+  async remove(id: string) {
+    const entry = await this.findOne(id);
+
+    await this.prismaService.entry.delete({
+      where: { id: entry.id },
+    });
+    return { message: `Запись с ID ${id} успешно удалена` };
   }
 }
