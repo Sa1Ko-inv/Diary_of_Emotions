@@ -1,21 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Res, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterDto } from './dto/register.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginRequest } from './dto/login.dto';
+import type { Request, Response } from 'express';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.userService.register(dto);
+  @HttpCode(HttpStatus.CREATED)
+  register(@Res({ passthrough: true }) res: Response, @Body() dto: RegisterDto) {
+    return this.userService.register(res, dto);
   }
 
   @Post('login')
-  login(@Body() dto: LoginRequest) {
-    return this.userService.login(dto);
+  @HttpCode(HttpStatus.OK)
+  login(@Res({ passthrough: true }) res: Response, @Body() dto: LoginRequest) {
+    return this.userService.login(res, dto);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.userService.refresh(req, res);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  logout(@Res({ passthrough: true }) res: Response) {
+    return this.userService.logout(res);
   }
 
   @Get()
