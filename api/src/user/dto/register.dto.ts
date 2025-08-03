@@ -1,8 +1,8 @@
-import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 
-export class CreateUserDto {
+export class RegisterDto {
   @IsString({ message: 'Почта должна быть строкой' })
   @IsNotEmpty({ message: 'Почта не может быть пустой' })
   @IsEmail({}, { message: 'Почта должна быть корректной' })
@@ -10,6 +10,8 @@ export class CreateUserDto {
 
   @IsString({ message: 'Пароль должен быть строкой' })
   @IsNotEmpty({ message: 'Пароль не может быть пустым' })
+  @MinLength(6, { message: 'Пароль должен быть не менее 6 символов' })
+  @MaxLength(20, { message: 'Пароль должен быть не более 20 символов' })
   password: string;
 
   @IsString({ message: 'Имя должно быть строкой' })

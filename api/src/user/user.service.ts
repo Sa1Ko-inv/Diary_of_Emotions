@@ -1,17 +1,34 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { RegisterDto } from './dto/register.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './dto/response-user.dto';
 import * as argon2 from 'argon2';
+import { JwtPayload } from './interdaces/jwt.interfaces';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { LoginRequest } from './dto/login.dto';
+import { verify } from 'argon2';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  private readonly JWT_SECRET: string;
+  private readonly JWT_ACCESS_TOKEN_TTL: string;
+  private readonly JWT_REFRESH_TOKEN_TTL: string;
 
-  async create(dto: CreateUserDto): Promise<User> {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService
+  ) {
+    this.JWT_SECRET = configService.getOrThrow<string>('JWT_SECRET');
+    this.JWT_ACCESS_TOKEN_TTL = configService.getOrThrow<string>('JWT_ACCESS_TOKEN_TTL');
+    this.JWT_REFRESH_TOKEN_TTL = configService.getOrThrow<string>('JWT_REFRESH_TOKEN_TTL');
+  }
+
+  async register(dto: RegisterDto) {
     const { email, password, firstName, lastName, birthDate } = dto;
 
     const hashedPassword = await argon2.hash(password, {
@@ -26,7 +43,7 @@ export class UserService {
       where: { email },
     });
     if (existingUser) {
-      throw new ConflictException(`Пользователь с email ${email} уже существует`);
+      throw new ConflictException(`Пользователь с email '${email}' уже существует`);
     }
 
     const user = await this.prismaService.user.create({
@@ -38,7 +55,51 @@ export class UserService {
         birthDate, // Ensure the date is stored correctly
       },
     });
-    return user;
+
+    const tokens = this.generateTokens(user.id);
+
+    return {user, tokens}
+  }
+
+  async login (dto: LoginRequest) {
+    const { email, password } = dto;
+
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      }
+    })
+
+    if (!user) {
+      throw new NotFoundException(`Пользователь не найден`);
+    }
+
+    const isValidPassword = await verify(user.password, password)
+
+    if( !isValidPassword) {
+      throw new NotFoundException('Пользователь не найден')
+    }
+
+    return this.generateTokens(user.id)
+  }
+
+  private generateTokens(id: string) {
+    const payload: JwtPayload = { id };
+
+    const accessToken:string = this.jwtService.sign(payload, {
+      expiresIn: this.JWT_ACCESS_TOKEN_TTL,
+    });
+    const refreshToken:string = this.jwtService.sign(payload, {
+      expiresIn: this.JWT_REFRESH_TOKEN_TTL,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   async findAll() {
@@ -90,9 +151,7 @@ export class UserService {
       : user.password;
 
     const currentBirthDate =
-      typeof user.birthDate === 'string'
-        ? new Date(user.birthDate.split('/').reverse().join('-'))
-        : user.birthDate;
+      typeof user.birthDate === 'string' ? new Date(user.birthDate.split('/').reverse().join('-')) : user.birthDate;
 
     const updatedUser = await this.prismaService.user.update({
       where: { id: user.id },
