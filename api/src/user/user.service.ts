@@ -120,6 +120,7 @@ export class UserService {
     return true
   }
 
+  // Приватный метод для аутентификации пользователя и установки токенов
   private auth(res: Response, id: string) {
     const { accessToken, refreshToken } = this.generateTokens(id);
 
