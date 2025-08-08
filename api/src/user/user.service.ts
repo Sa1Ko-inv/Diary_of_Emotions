@@ -59,7 +59,6 @@ export class UserService {
       },
     });
 
-    const tokens = this.generateTokens(user.id);
 
     return this.auth(res, user.id);
   }
@@ -115,9 +114,21 @@ export class UserService {
 
   // Метод для выхода пользователя
   async logout(res: Response) {
-    this.setCookie(res, 'refreshToken', new Date(0))
+    this.setCookie(res, 'refreshToken', new Date(0));
 
-    return true
+    return true;
+  }
+
+  async validate(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Пользователь не найден`);
+    }
+
+    return user;
   }
 
   // Приватный метод для аутентификации пользователя и установки токенов

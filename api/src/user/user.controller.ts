@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Res, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Res,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterDto } from './dto/register.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,8 +28,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { AuthResponse } from './dto/auth.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Authorization } from './decorator/authorization.decorator';
+import { Authorized } from './decorator/authorized.decorator';
+import { User } from '@prisma/client';
 
-// TODO: добавить guard и декораторы, которые будут позволять проверять авторизацию 6:14:00
+// TODO: добавить guard и декораторы, которые будут позволять проверять авторизацию 6:19:30
 
 @ApiTags('Пользователи')
 @Controller('user')
@@ -27,8 +45,9 @@ export class UserController {
     summary: 'Регистрация пользователя',
     description: 'Позволяет зарегистрировать нового пользователя в системе.',
   })
-  @ApiCreatedResponse({ description: 'Пользователь успешно зарегистрирован.' })
+  @ApiOkResponse({ type: AuthResponse })
   @ApiConflictResponse({ description: 'Пользователь с таким email уже существует.' })
+  @ApiBadRequestResponse({ description: 'Некорректные данные для регистрации.' })
   @Post('register')
   register(@Res({ passthrough: true }) res: Response, @Body() dto: RegisterDto) {
     return this.userService.register(res, dto);
@@ -38,8 +57,9 @@ export class UserController {
     summary: 'Авторизация пользователя',
     description: 'Позволяет пользователю войти в систему.',
   })
-  @ApiOkResponse({ description: 'Пользователь успешно авторизован.' })
+  @ApiOkResponse({ type: AuthResponse })
   @ApiBadRequestResponse({ description: 'Неверный email или пароль.' })
+  @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -58,8 +78,9 @@ export class UserController {
     summary: 'Обновление токена',
     description: 'Позволяет обновить токен доступа пользователя.',
   })
+  @ApiOkResponse({ type: AuthResponse })
+  @ApiUnauthorizedResponse({ description: 'Недействительный refresh-токен' })
   @Post('refresh')
-  @ApiOkResponse({ description: 'Токен успешно обновлен' })
   refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     return this.userService.refresh(req, res);
   }
@@ -69,11 +90,13 @@ export class UserController {
     description: 'Позволяет пользователю выйти из системы.',
   })
   @ApiOkResponse({ description: 'Пользователь успешно вышел из системы.' })
+  @Authorization()
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     return this.userService.logout(res);
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Получение всех пользователей',
     description: 'Возвращает список всех зарегистрированных пользователей.',
@@ -81,8 +104,8 @@ export class UserController {
   @ApiOkResponse({ description: 'Список пользователей успешно получен.' })
   @ApiNotFoundResponse({ description: 'Список пользователей не найден' })
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Authorized('id') id: string) {
+    return { id };
   }
 
   @ApiOperation({
