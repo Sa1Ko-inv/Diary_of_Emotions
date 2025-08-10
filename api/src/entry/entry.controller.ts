@@ -15,12 +15,14 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Authorization } from '../user/decorator/authorization.decorator';
 
 @ApiTags('Записи дневника')
 @Controller('entry')
 export class EntryController {
   constructor(private readonly entryService: EntryService) {}
 
+  @Authorization()
   @ApiOperation({
     summary: 'Создание записи дневника',
     description: 'Позволяет создать новую запись в дневнике с эмоциями и триггерами',
@@ -36,6 +38,7 @@ export class EntryController {
     return this.entryService.create(testUserId, dto);
   }
 
+  @Authorization()
   @ApiOperation({ summary: 'Получение всех записей дневника', description: 'Возвращает список всех записей дневника' })
   @ApiOkResponse({ description: 'Список записей успешно получен' })
   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
@@ -45,6 +48,7 @@ export class EntryController {
     return this.entryService.findAll();
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Получение записи дневника по ID',
     description: 'Возвращает запись дневника по её уникальному идентификатору',
@@ -58,6 +62,7 @@ export class EntryController {
     return this.entryService.findOne(id);
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Обновление записи дневника',
     description: 'Позволяет обновить существующую запись дневника',
@@ -71,6 +76,7 @@ export class EntryController {
     return this.entryService.update(id, updateEntryDto);
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Удаление записи дневника',
     description: 'Позволяет удалить запись дневника по её уникальному идентификатору',

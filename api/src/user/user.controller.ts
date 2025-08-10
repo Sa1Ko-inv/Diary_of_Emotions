@@ -29,12 +29,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthResponse } from './dto/auth.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { Authorization } from './decorator/authorization.decorator';
 import { Authorized } from './decorator/authorized.decorator';
-import { User } from '@prisma/client';
 
-// TODO: добавить guard и декораторы, которые будут позволять проверять авторизацию 6:19:30
+// TODO: остановился на 6:35:40
+// Пример авторизации и аутентификации показан в findAll
 
 @ApiTags('Пользователи')
 @Controller('user')
@@ -85,6 +84,7 @@ export class UserController {
     return this.userService.refresh(req, res);
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Выход пользователя',
     description: 'Позволяет пользователю выйти из системы.',
@@ -120,6 +120,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Обновление пользователя',
     description: 'Позволяет обновить информацию о пользователе по его уникальному идентификатору.',

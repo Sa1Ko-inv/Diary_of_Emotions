@@ -6,7 +6,7 @@ import { User } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './dto/response-user.dto';
 import * as argon2 from 'argon2';
-import type { JwtPayload } from './interdaces/jwt.interfaces';
+import type { JwtPayload } from './interfaces/jwt.interfaces';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { LoginRequest } from './dto/login.dto';

@@ -15,12 +15,14 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Authorization } from '../user/decorator/authorization.decorator';
 
 @ApiTags('Триггеры')
 @Controller('trigger')
 export class TriggerController {
   constructor(private readonly triggerService: TriggerService) {}
 
+  @Authorization()
   @ApiOperation({ summary: 'Создание триггера', description: 'Позволяет создать пользовательский триггер' })
   @ApiCreatedResponse({ description: 'Триггер успешно создан' })
   @ApiBadRequestResponse({ description: 'Некорректные данные для создания триггера' })
@@ -32,6 +34,7 @@ export class TriggerController {
     return this.triggerService.create(testOrderBy, dto);
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Получение всех триггеров',
     description: 'Возвращает список всех пользовательских триггеров',
@@ -45,6 +48,7 @@ export class TriggerController {
     return this.triggerService.findAll();
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Получение триггеров, созданных пользователем',
     description: 'Возвращает список триггеров, созданных текущим пользователем',
@@ -58,6 +62,7 @@ export class TriggerController {
     return this.triggerService.findCreatedByUser();
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Получение триггера по ID',
     description: 'Возвращает триггер по его уникальному идентификатору',
@@ -71,6 +76,7 @@ export class TriggerController {
     return this.triggerService.findOne(id);
   }
 
+  @Authorization()
   @ApiOperation({
     summary: 'Обновление триггера',
     description: 'Позволяет обновить существующий триггер по его ID',
@@ -84,6 +90,7 @@ export class TriggerController {
     return this.triggerService.update(id, updateTriggerDto);
   }
 
+  @Authorization()
   @ApiOperation({ summary: 'Удаление триггера', description: 'Позволяет удалить триггер по его ID' })
   @ApiOkResponse({ description: 'Триггер успешно удален' })
   @ApiNotFoundResponse({ description: 'Триггер не найден' })

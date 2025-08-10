@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { EntryModule } from './entry/entry.module';
 import { TriggerModule } from './trigger/trigger.module';
+import { EmotionModule } from './emotion/emotion.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TriggerModule } from './trigger/trigger.module';
     UserModule,
     EntryModule,
     TriggerModule,
+    EmotionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
