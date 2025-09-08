@@ -51,7 +51,8 @@ model User {
 
   entries Entry[] // Эмоциональные записи
 
-  // streaks       Streak[] // Эмоциональные стрики
+  streaks EmotionStreak[] // Эмоциональные стрики
+
   // cleanStreaks  CleanStreak[] // Счётчики отказа от привычек
   // achievements  UserAchievement[] // Полученные ачивки
   // notifications Notification[] // Уведомления
@@ -91,7 +92,8 @@ model EmotionGroup {
   name  String // Название группы, напр. "Грусть"
   color String? // HEX цвет (опционально для визуализации)
 
-  types EmotionType[] // Все подтипы в группе
+  types         EmotionType[] // Все подтипы в группе
+  EmotionStreak EmotionStreak[]
 
   @@map("emotion_groups") // Переименование таблицы в БД
 }
@@ -131,19 +133,22 @@ model TriggerOnEntry {
   @@map("entry_triggers") // Переименование таблицы в БД
 }
 
-//
-// // Эмоциональный стрик (записи с одинаковой эмоцией подряд)
-// model Streak {
-//   id         String    @id @default(uuid())                   // Уникальный ID
-//   userId     String
-//   startDate  DateTime                                        // Дата начала
-//   endDate    DateTime                                        // Дата окончания
-//   emotion    Emotion?                                        // С какой эмоцией связан
-//
-//   user       User      @relation(fields: [userId], references: [id])
-//
-//   @@map("streaks") // Переименование таблицы в БД
-// }
+// TODO: Реализовать стрики
+// Стрик по эмоциям
+model EmotionStreak {
+  id             String   @id @default(uuid())
+  userId         String // Пользователь
+  emotionGroupId String // Конкретная эмоция (EmotionType)
+  count          Int      @default(0) // Количество подряд идущих дней
+  lastDate       DateTime // Дата последней записи
+
+  user    User         @relation(fields: [userId], references: [id])
+  emotion EmotionGroup @relation(fields: [emotionGroupId], references: [id])
+
+  @@unique([userId, emotionGroupId]) // уникальный стрик на юзера и эмоцию
+  @@map("emotion_streaks")
+}
+
 //
 // // Ачивка — достижение в системе
 // model Achievement {

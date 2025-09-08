@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { EntryModule } from './entry/entry.module';
 import { TriggerModule } from './trigger/trigger.module';
 import { EmotionModule } from './emotion/emotion.module';
+import { EmotionStreakModule } from './emotion-streak/emotion-streak.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EmotionModule } from './emotion/emotion.module';
     EntryModule,
     TriggerModule,
     EmotionModule,
+    EmotionStreakModule,
   ],
   controllers: [AppController],
   providers: [AppService],

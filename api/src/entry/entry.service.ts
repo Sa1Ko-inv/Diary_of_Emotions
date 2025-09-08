@@ -10,7 +10,7 @@ import { EntryResponseDto } from './dto/response-entry.dto';
 export class EntryService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  // TODO разобраться как работает создание записи
+  // TODO разобраться как работает создание записи и доделать стрики
   async create(userId: string, dto: CreateEntryDto): Promise<Entry> {
     const { date, description, emotions, triggers } = dto;
 
@@ -30,23 +30,23 @@ export class EntryService {
         triggers: {
           create: await Promise.all(
             triggers.map(async (label) => {
-              // Нормализуем label, приводя к нижнему регистру
+              // Нормализуем label
               const normalizedLabel = label.trim().toLowerCase();
 
-              // Ищем существующий триггер с нормализованным label
+              // Проверяем, существует ли триггер
               const existing = await this.prismaService.trigger.findFirst({
                 where: {
-                  label: { equals: normalizedLabel, mode: 'insensitive' }, // Регистронезависимый поиск
+                  label: { equals: normalizedLabel, mode: 'insensitive' },
                   OR: [{ createdBy: null }, { createdBy: userId }],
                 },
               });
 
-              // Если триггер не существует, создаем с оригинальным label
+              // Если нет — создаем
               const trigger =
                 existing ??
                 (await this.prismaService.trigger.create({
                   data: {
-                    label: label, // Сохраняем оригинальный label для отображения
+                    label: label, // Сохраняем оригинальный label
                     createdBy: userId,
                   },
                 }));
@@ -56,7 +56,7 @@ export class EntryService {
                   connect: { id: trigger.id },
                 },
               };
-            })
+            }),
           ),
         },
       },
@@ -64,9 +64,7 @@ export class EntryService {
         emotions: {
           include: {
             emotion: {
-              include: {
-                group: true,
-              },
+              include: { group: true },
             },
           },
         },
@@ -77,8 +75,67 @@ export class EntryService {
         },
       },
     });
+
+    // ✅ Обновляем стрики
+    for (const entryEmotion of entry.emotions) {
+      const groupId = entryEmotion.emotion.group.id;
+
+      await this.prismaService.$transaction(async (tx) => {
+        const streak = await tx.emotionStreak.findUnique({
+          where: {
+            userId_emotionGroupId: {
+              userId,
+              emotionGroupId: groupId,
+            },
+          },
+        });
+
+        const today = new Date(entry.date);
+        today.setUTCHours(0, 0, 0, 0)
+        const yesterday = new Date(today);
+        yesterday.setUTCDate(today.getUTCDate() - 1);
+
+        if (!streak) {
+          // Создаем новый стрик
+          await tx.emotionStreak.create({
+            data: {
+              userId,
+              emotionGroupId: groupId,
+              count: 1,
+              lastDate: today,
+            },
+          });
+        } else {
+          const lastDate = new Date(streak.lastDate);
+          lastDate.setUTCHours(0, 0, 0, 0);
+
+          if (lastDate.getTime() === yesterday.getTime()) {
+            // Продолжаем стрик
+            await tx.emotionStreak.update({
+              where: { id: streak.id },
+              data: {
+                count: streak.count + 1,
+                lastDate: today,
+              },
+            });
+          } else if (lastDate.getTime() !== today.getTime()) {
+            // Если стрик прервался или пропуск дня
+            await tx.emotionStreak.update({
+              where: { id: streak.id },
+              data: {
+                count: 1,
+                lastDate: today,
+              },
+            });
+          }
+          // Если lastDate === today → ничего не делаем
+        }
+      });
+    }
+
     return entry;
   }
+
 
   findAll() {
     const entries = this.prismaService.entry.findMany({

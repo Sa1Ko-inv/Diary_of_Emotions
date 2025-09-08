@@ -16,6 +16,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Authorization } from '../user/decorator/authorization.decorator';
+import { Authorized } from '../user/decorator/authorized.decorator';
 
 @ApiTags('Записи дневника')
 @Controller('entry')
@@ -32,10 +33,9 @@ export class EntryController {
   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
   @ApiHeader({ name: 'X-Auth-Token', description: 'Токен авторизации пользователя для доступа к защищённым ресурсам' })
   @Post()
-  create(@Body() dto: CreateEntryDto) {
-    // TODO: заменить на получение ID пользователя из запроса
-    const testUserId = '5494bb47-e586-4272-9f3f-b5db6b19bde9';
-    return this.entryService.create(testUserId, dto);
+  create(@Body() dto: CreateEntryDto, @Authorized('id') id: string) {
+
+    return this.entryService.create(id, dto);
   }
 
   @Authorization()
