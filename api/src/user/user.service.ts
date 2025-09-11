@@ -59,7 +59,6 @@ export class UserService {
       },
     });
 
-
     return this.auth(res, user.id);
   }
 
@@ -114,7 +113,7 @@ export class UserService {
 
   // Метод для выхода пользователя
   async logout(res: Response) {
-    this.setCookie(res, 'refreshToken', new Date(0));
+    фцфthis.setCookie(res, 'refreshToken', new Date(0));
 
     return true;
   }

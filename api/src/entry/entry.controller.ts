@@ -4,14 +4,11 @@ import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
 import {
   ApiBadRequestResponse,
-  ApiBody,
   ApiCreatedResponse,
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
-  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -25,8 +22,8 @@ export class EntryController {
 
   @Authorization()
   @ApiOperation({
-    summary: 'Создание записи дневника',
-    description: 'Позволяет создать новую запись в дневнике с эмоциями и триггерами',
+    summary: 'Создание записи дневника и добавление стриков эмоций',
+    description: 'Позволяет создать новую запись в дневнике с эмоциями и триггерами, а также в системе создается стрики',
   })
   @ApiCreatedResponse({ description: 'Запись успешно создана' })
   @ApiBadRequestResponse({ description: 'Некорректные данные для создания записи' })
@@ -34,7 +31,6 @@ export class EntryController {
   @ApiHeader({ name: 'X-Auth-Token', description: 'Токен авторизации пользователя для доступа к защищённым ресурсам' })
   @Post()
   create(@Body() dto: CreateEntryDto, @Authorized('id') id: string) {
-
     return this.entryService.create(id, dto);
   }
 
