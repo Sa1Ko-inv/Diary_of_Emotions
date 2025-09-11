@@ -113,7 +113,7 @@ export class UserService {
 
   // Метод для выхода пользователя
   async logout(res: Response) {
-    фцфthis.setCookie(res, 'refreshToken', new Date(0));
+    this.setCookie(res, 'refreshToken', new Date(0));
 
     return true;
   }
