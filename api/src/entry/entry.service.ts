@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateEntryDto } from './dto/create-entry.dto';
-import { UpdateEntryDto } from './dto/update-entry.dto';
 import { Entry, EntryEmotion } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
+
+import { PrismaService } from '../prisma/prisma.service';
+
+import { CreateEntryDto } from './dto/create-entry.dto';
 import { EntryResponseDto } from './dto/response-entry.dto';
+import { UpdateEntryDto } from './dto/update-entry.dto';
 
 @Injectable()
 export class EntryService {
@@ -20,7 +22,7 @@ export class EntryService {
         date: date ? new Date(date) : new Date(),
         description,
         emotions: {
-          create: emotions.map((emotion) => ({
+          create: emotions.map(emotion => ({
             emotion: {
               connect: { id: emotion.emotionTypeId },
             },
@@ -29,7 +31,7 @@ export class EntryService {
         },
         triggers: {
           create: await Promise.all(
-            triggers.map(async (label) => {
+            triggers.map(async label => {
               // Нормализуем label
               const normalizedLabel = label.trim().toLowerCase();
 
@@ -56,7 +58,7 @@ export class EntryService {
                   connect: { id: trigger.id },
                 },
               };
-            }),
+            })
           ),
         },
       },
@@ -80,7 +82,7 @@ export class EntryService {
     for (const entryEmotion of entry.emotions) {
       const groupId = entryEmotion.emotion.group.id;
 
-      await this.prismaService.$transaction(async (tx) => {
+      await this.prismaService.$transaction(async tx => {
         const streak = await tx.emotionStreak.findUnique({
           where: {
             userId_emotionGroupId: {
@@ -91,7 +93,7 @@ export class EntryService {
         });
 
         const today = new Date(entry.date);
-        today.setUTCHours(0, 0, 0, 0)
+        today.setUTCHours(0, 0, 0, 0);
         const yesterday = new Date(today);
         yesterday.setUTCDate(today.getUTCDate() - 1);
 
@@ -135,7 +137,6 @@ export class EntryService {
 
     return entry;
   }
-
 
   findAll() {
     const entries = this.prismaService.entry.findMany({
@@ -214,7 +215,7 @@ export class EntryService {
           // Удаляем старые связи с эмоциями
           deleteMany: { entryId: id },
           // Создаем новые связи
-          create: emotions.map((emotion) => ({
+          create: emotions.map(emotion => ({
             emotion: {
               connect: { id: emotion.emotionTypeId },
             },
@@ -230,7 +231,7 @@ export class EntryService {
           deleteMany: { entryId: id },
           // Создаем новые связи
           create: await Promise.all(
-            triggers.map(async (label) => {
+            triggers.map(async label => {
               // Нормализуем label, приводя к нижнему регистру
               const normalizedLabel = label.trim().toLowerCase();
 

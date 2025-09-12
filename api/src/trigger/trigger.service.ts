@@ -1,8 +1,15 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Trigger } from '@prisma/client';
+
+import { PrismaService } from '../prisma/prisma.service';
+
 import { CreateTriggerDto } from './dto/create-trigger.dto';
 import { UpdateTriggerDto } from './dto/update-trigger.dto';
-import { Trigger } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TriggerService {
@@ -27,7 +34,9 @@ export class TriggerService {
     });
 
     if (existingTrigger) {
-      throw new ConflictException(`Триггер с таким label '${label}' уже существует: ${existingTrigger.label}`);
+      throw new ConflictException(
+        `Триггер с таким label '${label}' уже существует: ${existingTrigger.label}`
+      );
     }
 
     const formattedLabel = this.capitalizeFirstLetter(label.trim());

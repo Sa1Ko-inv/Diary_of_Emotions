@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { EmotionService } from './emotion.service';
+
 import { EmotionController } from './emotion.controller';
+import { EmotionService } from './emotion.service';
 
 @Module({
   controllers: [EmotionController],

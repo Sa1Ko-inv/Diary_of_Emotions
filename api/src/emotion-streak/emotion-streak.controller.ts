@@ -1,10 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { EmotionStreakService } from './emotion-streak.service';
-import { CreateEmotionStreakDto } from './dto/create-emotion-streak.dto';
-import { UpdateEmotionStreakDto } from './dto/update-emotion-streak.dto';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+
 import { Authorization } from '../user/decorator/authorization.decorator';
 import { Authorized } from '../user/decorator/authorized.decorator';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+
+import { CreateEmotionStreakDto } from './dto/create-emotion-streak.dto';
+import { UpdateEmotionStreakDto } from './dto/update-emotion-streak.dto';
+import { EmotionStreakService } from './emotion-streak.service';
 
 @ApiTags('Эмоциональный стрик')
 @Controller('emotion-streak')
@@ -19,10 +27,13 @@ export class EmotionStreakController {
   @Authorization()
   @ApiOperation({
     summary: 'Получение эмоциональных стриков пользователя',
-    description: 'Позволяет получить все эмоциональные стрики, связанные с авторизованным пользователем.',
+    description:
+      'Позволяет получить все эмоциональные стрики, связанные с авторизованным пользователем.',
   })
   @ApiOkResponse({ description: 'Список эмоциональных стриков пользователя успешно получен.' })
-  @ApiNotFoundResponse({ description: 'Пользователь не найден или у пользователя нет эмоциональных стриков.' })
+  @ApiNotFoundResponse({
+    description: 'Пользователь не найден или у пользователя нет эмоциональных стриков.',
+  })
   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован.' })
   @Get()
   async getUserStreaks(@Authorized('id') id: string) {

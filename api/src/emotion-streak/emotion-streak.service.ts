@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '../prisma/prisma.service';
+
 import { CreateEmotionStreakDto } from './dto/create-emotion-streak.dto';
 import { UpdateEmotionStreakDto } from './dto/update-emotion-streak.dto';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EmotionStreakService {
-  constructor(private readonly prismaService: PrismaService) {
-  }
+  constructor(private readonly prismaService: PrismaService) {}
 
   // create(createEmotionStreakDto: CreateEmotionStreakDto) {
   //   return 'This action adds a new emotionStreak';
@@ -16,7 +17,7 @@ export class EmotionStreakService {
     return this.prismaService.emotionStreak.findMany({
       where: { userId },
       include: { emotion: true },
-    })
+    });
   }
 
   // findOne(id: number) {

@@ -10,6 +10,6 @@ export async function getJwtConfig(configService: ConfigService): Promise<JwtMod
     verifyOptions: {
       algorithms: ['HS256'],
       ignoreExpiration: false,
-    }
+    },
   };
 }

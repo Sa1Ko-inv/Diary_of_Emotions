@@ -28,5 +28,4 @@ export class EntryResponseDto {
   }[];
   @Expose()
   triggers: string[];
-
 }

@@ -4,20 +4,22 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RegisterDto } from './dto/register.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { User } from '@prisma/client';
-import { plainToInstance } from 'class-transformer';
-import { UserResponseDto } from './dto/response-user.dto';
-import * as argon2 from 'argon2';
-import type { JwtPayload } from './interfaces/jwt.interfaces';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { LoginRequest } from './dto/login.dto';
+import { User } from '@prisma/client';
+import * as argon2 from 'argon2';
 import { verify } from 'argon2';
-import type { Response, Request } from 'express';
+import { plainToInstance } from 'class-transformer';
+import type { Request, Response } from 'express';
+
 import { isDev } from '../libs/common/utils/is-dev.util';
+import { PrismaService } from '../prisma/prisma.service';
+
+import { LoginRequest } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { UserResponseDto } from './dto/response-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import type { JwtPayload } from './interfaces/jwt.interfaces';
 
 @Injectable()
 export class UserService {

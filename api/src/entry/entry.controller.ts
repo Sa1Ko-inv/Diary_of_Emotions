@@ -1,7 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, HttpStatus } from '@nestjs/common';
-import { EntryService } from './entry.service';
-import { CreateEntryDto } from './dto/create-entry.dto';
-import { UpdateEntryDto } from './dto/update-entry.dto';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Req } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -12,8 +9,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
 import { Authorization } from '../user/decorator/authorization.decorator';
 import { Authorized } from '../user/decorator/authorized.decorator';
+
+import { CreateEntryDto } from './dto/create-entry.dto';
+import { UpdateEntryDto } from './dto/update-entry.dto';
+import { EntryService } from './entry.service';
 
 @ApiTags('Записи дневника')
 @Controller('entry')
@@ -23,22 +25,32 @@ export class EntryController {
   @Authorization()
   @ApiOperation({
     summary: 'Создание записи дневника и добавление стриков эмоций',
-    description: 'Позволяет создать новую запись в дневнике с эмоциями и триггерами, а также в системе создается стрики',
+    description:
+      'Позволяет создать новую запись в дневнике с эмоциями и триггерами, а также в системе создается стрики',
   })
   @ApiCreatedResponse({ description: 'Запись успешно создана' })
   @ApiBadRequestResponse({ description: 'Некорректные данные для создания записи' })
   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
-  @ApiHeader({ name: 'X-Auth-Token', description: 'Токен авторизации пользователя для доступа к защищённым ресурсам' })
+  @ApiHeader({
+    name: 'X-Auth-Token',
+    description: 'Токен авторизации пользователя для доступа к защищённым ресурсам',
+  })
   @Post()
   create(@Body() dto: CreateEntryDto, @Authorized('id') id: string) {
     return this.entryService.create(id, dto);
   }
 
   @Authorization()
-  @ApiOperation({ summary: 'Получение всех записей дневника', description: 'Возвращает список всех записей дневника' })
+  @ApiOperation({
+    summary: 'Получение всех записей дневника',
+    description: 'Возвращает список всех записей дневника',
+  })
   @ApiOkResponse({ description: 'Список записей успешно получен' })
   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
-  @ApiHeader({ name: 'X-Auth-Token', description: 'Токен авторизации пользователя для доступа к защищённым ресурсам' })
+  @ApiHeader({
+    name: 'X-Auth-Token',
+    description: 'Токен авторизации пользователя для доступа к защищённым ресурсам',
+  })
   @Get()
   findAll() {
     return this.entryService.findAll();
@@ -52,7 +64,10 @@ export class EntryController {
   @ApiOkResponse({ description: 'Запись успешно найдена' })
   @ApiNotFoundResponse({ description: 'Запись не найдена' })
   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
-  @ApiHeader({ name: 'X-Auth-Token', description: 'Токен авторизации пользователя для доступа к защищённым ресурсам' })
+  @ApiHeader({
+    name: 'X-Auth-Token',
+    description: 'Токен авторизации пользователя для доступа к защищённым ресурсам',
+  })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.entryService.findOne(id);
@@ -66,7 +81,10 @@ export class EntryController {
   @ApiOkResponse({ description: 'Запись успешно обновлена' })
   @ApiNotFoundResponse({ description: 'Запись не найдена' })
   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
-  @ApiHeader({ name: 'X-Auth-Token', description: 'Токен авторизации пользователя для доступа к защищённым ресурсам' })
+  @ApiHeader({
+    name: 'X-Auth-Token',
+    description: 'Токен авторизации пользователя для доступа к защищённым ресурсам',
+  })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEntryDto: UpdateEntryDto) {
     return this.entryService.update(id, updateEntryDto);
@@ -80,7 +98,10 @@ export class EntryController {
   @ApiOkResponse({ description: 'Запись успешно удалена' })
   @ApiNotFoundResponse({ description: 'Запись не найдена' })
   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
-  @ApiHeader({ name: 'X-Auth-Token', description: 'Токен авторизации пользователя для доступа к защищённым ресурсам' })
+  @ApiHeader({
+    name: 'X-Auth-Token',
+    description: 'Токен авторизации пользователя для доступа к защищённым ресурсам',
+  })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.entryService.remove(id);

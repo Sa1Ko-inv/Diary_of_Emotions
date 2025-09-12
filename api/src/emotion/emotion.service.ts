@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '../prisma/prisma.service';
+
 import { CreateEmotionDto } from './dto/create-emotion.dto';
 import { UpdateEmotionDto } from './dto/update-emotion.dto';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EmotionService {
