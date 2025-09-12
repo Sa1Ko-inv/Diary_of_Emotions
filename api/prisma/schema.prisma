@@ -11,6 +11,17 @@ datasource db {
 //
 // === ENUM'ы ===
 //
+enum AuthMethod {
+  CREDENTIALS
+  GOOGLE
+  YANDEX
+}
+
+enum TokenType {
+  VERIFICATION
+  TWO_FACTOR
+  PASSWORD_RESET
+}
 
 //
 // // Тип уведомления
@@ -41,14 +52,26 @@ datasource db {
 // TODO Добавить displayName, pictureUrl, isVerified (может быть еще isTwoFactorEnabled) и метод аутентификации (credentials (поля), google, yandex)
 // Пользователь
 model User {
-  id        String   @id @default(uuid()) // Уникальный ID
-  email     String   @unique // Email
-  password  String // Хеш пароля
+  id       String @id @default(uuid()) // Уникальный ID
+  email    String @unique // Email
+  password String // Хеш пароля
+
   firstName String   @map("first_name") // Имя
   lastName  String   @map("last_name") // Фамилия
   birthDate DateTime @map("birth_date") // Дата рождения
-  createdAt DateTime @default(now()) // Дата регистрации
-  updatedAt DateTime @updatedAt // Дата последнего обновления
+
+  displayName String  @map("display_name")
+  picture     String?
+
+  isVerified         Boolean @default(false) @map("is_verified") // Подтверждён ли email
+  isTwoFactorEnabled Boolean @default(false) @map("is_two_factor_enabled") // Включена ли двухфакторная аутентификация
+
+  method AuthMethod
+
+  accounts Account[]
+
+  createdAt DateTime @default(now()) @map("created_at") // Дата регистрации
+  updatedAt DateTime @updatedAt @map("updated_at") // Дата последнего обновления
 
   entries Entry[] // Эмоциональные записи
 
@@ -58,6 +81,37 @@ model User {
   // achievements  UserAchievement[] // Полученные ачивки
   // notifications Notification[] // Уведомления
   @@map("users") // Переименование таблицы в БД
+}
+
+// Таблица для хранения информации о различных способах аутентификации пользователей (например, через Google, Yandex и т.д.), она включает в себя тип, провайдера, какой метод аутентификации используется, токен доступа
+model Account {
+  id String @id @default(uuid())
+
+  type     String
+  provider String
+
+  refreshToken String? @map("refresh_token")
+  accessToken  String? @map("access_token")
+  expiresAt    Int?    @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?  @map("user_id")
+
+  @@map("accounts")
+}
+
+model Token {
+  id String @id @default(uuid())
+
+  email String
+  token String    @unique
+  type  TokenType
+
+  expiresIn DateTime @map("expires_in") // Время истечения токена
+
+  @@map("tokens")
 }
 
 // Эмоциональная запись
