@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,7 +17,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginRequest } from './dto/login.dto';
 import { verify } from 'argon2';
 import type { Response, Request } from 'express';
-import { isDev } from '../utils/is-dev.util';
+import { isDev } from '../libs/common/utils/is-dev.util';
 
 @Injectable()
 export class UserService {
@@ -167,22 +172,22 @@ export class UserService {
     });
   }
 
-  async findAll() {
-    const user = await this.prismaService.user.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        birthDate: true,
-        createdAt: true,
-      },
-    });
-    return plainToInstance(UserResponseDto, user);
-  }
+  // async findAll() {
+  //   const user = await this.prismaService.user.findMany({
+  //     orderBy: {
+  //       createdAt: 'desc',
+  //     },
+  //     select: {
+  //       id: true,
+  //       email: true,
+  //       firstName: true,
+  //       lastName: true,
+  //       birthDate: true,
+  //       createdAt: true,
+  //     },
+  //   });
+  //   return plainToInstance(UserResponseDto, user);
+  // }
 
   async findOne(id: string) {
     const user = await this.prismaService.user.findUnique({
@@ -216,7 +221,9 @@ export class UserService {
       : user.password;
 
     const currentBirthDate =
-      typeof user.birthDate === 'string' ? new Date(user.birthDate.split('/').reverse().join('-')) : user.birthDate;
+      typeof user.birthDate === 'string'
+        ? new Date(user.birthDate.split('/').reverse().join('-'))
+        : user.birthDate;
 
     const updatedUser = await this.prismaService.user.update({
       where: { id: user.id },

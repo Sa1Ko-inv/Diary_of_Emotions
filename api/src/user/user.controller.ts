@@ -32,7 +32,6 @@ import { AuthResponse } from './dto/auth.dto';
 import { Authorization } from './decorator/authorization.decorator';
 import { Authorized } from './decorator/authorized.decorator';
 
-// TODO: остановился на 6:35:40
 // Пример авторизации и аутентификации показан в findAll
 
 @ApiTags('Пользователи')

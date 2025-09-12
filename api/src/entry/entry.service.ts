@@ -10,7 +10,7 @@ import { EntryResponseDto } from './dto/response-entry.dto';
 export class EntryService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  // TODO разобраться как работает создание записи и доделать стрики
+  // TODO разобраться как работает создание записи
   async create(userId: string, dto: CreateEntryDto): Promise<Entry> {
     const { date, description, emotions, triggers } = dto;
 

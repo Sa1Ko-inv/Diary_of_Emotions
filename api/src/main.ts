@@ -2,23 +2,30 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-import { setupSwagger } from './utils/swagger.util';
-
-const PORT = process.env.PORT || 7000;
+import { setupSwagger } from './libs/common/utils/swagger.util';
+import { ConfigService } from '@nestjs/config';
 
 console.log('Server started on port', process.env.PORT);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(cookieParser());
+  const config = app.get(ConfigService);
+
+  app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')));
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
+  app.enableCors({
+    origin: config.getOrThrow<string>('ALLOWED_ORIGINS'),
+    credentials: true,
+    exposedHeaders: ['set-cookie'],
+  });
+
   setupSwagger(app);
 
-  await app.listen(PORT, () => {
-    console.log(`Сервер запущен на порту: ${PORT}`);
+  await app.listen(config.getOrThrow<number>('APPLICATION_PORT'), () => {
+    console.log(`Сервер запущен на порту: ${config.getOrThrow('APPLICATION_PORT')}`);
   });
 }
 

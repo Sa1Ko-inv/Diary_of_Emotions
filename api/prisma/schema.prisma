@@ -38,6 +38,7 @@ datasource db {
 // === Таблицы ===
 //
 
+// TODO Добавить displayName, pictureUrl, isVerified (может быть еще isTwoFactorEnabled) и метод аутентификации (credentials (поля), google, yandex)
 // Пользователь
 model User {
   id        String   @id @default(uuid()) // Уникальный ID
@@ -133,7 +134,6 @@ model TriggerOnEntry {
   @@map("entry_triggers") // Переименование таблицы в БД
 }
 
-// TODO: Реализовать стрики
 // Стрик по эмоциям
 model EmotionStreak {
   id             String   @id @default(uuid())

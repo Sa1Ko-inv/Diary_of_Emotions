@@ -8,10 +8,12 @@ import { EntryModule } from './entry/entry.module';
 import { TriggerModule } from './trigger/trigger.module';
 import { EmotionModule } from './emotion/emotion.module';
 import { EmotionStreakModule } from './emotion-streak/emotion-streak.module';
+import {IS_DEV_ENV} from "./libs/common/utils/is-dev.util";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      ignoreEnvFile: !IS_DEV_ENV,
       isGlobal: true,
       cache: true,
       expandVariables: true,
