@@ -8,7 +8,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { Authorization } from '../user/decorator/authorization.decorator';
+import { Authorization } from '../libs/common/decorator/authorization.decorator';
 
 import { CreateEmotionDto } from './dto/create-emotion.dto';
 import { UpdateEmotionDto } from './dto/update-emotion.dto';

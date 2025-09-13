@@ -7,8 +7,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { Authorization } from '../user/decorator/authorization.decorator';
-import { Authorized } from '../user/decorator/authorized.decorator';
+import { Authorization } from '../libs/common/decorator/authorization.decorator';
+import { Authorized } from '../libs/common/decorator/authorized.decorator';
 
 import { CreateEmotionStreakDto } from './dto/create-emotion-streak.dto';
 import { UpdateEmotionStreakDto } from './dto/update-emotion-streak.dto';

@@ -1,22 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res } from '@nestjs/common';
-import {
-   ApiBadRequestResponse,
-   ApiBody,
-   ApiConflictResponse,
-   ApiNotFoundResponse,
-   ApiOkResponse,
-   ApiOperation,
-   ApiTags,
-   ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
-import type { Request, Response } from 'express';
+import { Controller, Get } from '@nestjs/common';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { Authorization } from './decorator/authorization.decorator';
-import { Authorized } from './decorator/authorized.decorator';
-import { AuthResponse } from './dto/auth.dto';
-import { LoginRequest } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Authorization } from '../libs/common/decorator/authorization.decorator';
+import { Authorized } from '../libs/common/decorator/authorized.decorator';
+
 import { UserService } from './user.service';
 
 // Пример авторизации и аутентификации показан в findAll

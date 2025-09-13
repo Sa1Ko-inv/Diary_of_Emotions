@@ -1,25 +1,8 @@
-import {
-   ConflictException,
-   Injectable,
-   NotFoundException,
-   UnauthorizedException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { AuthMethod, User } from '@prisma/client';
-import * as argon2 from 'argon2';
-import { hash, verify } from 'argon2';
-import { plainToInstance } from 'class-transformer';
-import type { Request, Response } from 'express';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { AuthMethod } from '@prisma/client';
+import { hash } from 'argon2';
+import {PrismaService} from "../prisma/prisma.service";
 
-import { isDev } from '../libs/common/utils/is-dev.util';
-import { PrismaService } from '../prisma/prisma.service';
-
-import { LoginRequest } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { UserResponseDto } from './dto/response-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import type { JwtPayload } from './interfaces/jwt.interfaces';
 
 @Injectable()
 export class UserService {
@@ -55,8 +38,6 @@ export class UserService {
 
    // Будет вызываться два раза: создание пользователя при регистрации через поля и при регистрации через соцсеть
    public async create(
-      lastName: string,
-      firstName: string,
       email: string,
       password: string,
       displayName: string,
@@ -66,8 +47,6 @@ export class UserService {
    ) {
       const user = await this.prismaService.user.create({
          data: {
-            lastName,
-            firstName,
             email,
             password: password ? await hash(password) : '',
             displayName,
@@ -81,7 +60,6 @@ export class UserService {
       });
       return user;
    }
-
 }
 
 // export class UserService {

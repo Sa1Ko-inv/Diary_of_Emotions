@@ -13,7 +13,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { Authorization } from '../user/decorator/authorization.decorator';
+import { Authorization } from '../libs/common/decorator/authorization.decorator';
 
 import { CreateTriggerDto } from './dto/create-trigger.dto';
 import { UpdateTriggerDto } from './dto/update-trigger.dto';

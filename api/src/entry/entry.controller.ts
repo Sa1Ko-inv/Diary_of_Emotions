@@ -10,8 +10,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { Authorization } from '../user/decorator/authorization.decorator';
-import { Authorized } from '../user/decorator/authorized.decorator';
+import { Authorization } from '../libs/common/decorator/authorization.decorator';
+import { Authorized } from '../libs/common/decorator/authorized.decorator';
 
 import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
