@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { RedisStore } from 'connect-redis';
+import RedisStore from 'connect-redis';
 import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 import IORedis from 'ioredis';
@@ -18,6 +18,15 @@ async function bootstrap() {
 
    const config = app.get(ConfigService);
    const redis = new IORedis(config.getOrThrow('REDIS_URI'));
+
+   // Обработка ошибок подключения к Redis
+   redis.on('error', err => {
+      console.error('Redis error:', err);
+   });
+
+   redis.on('connect', () => {
+      console.log('Redis connected successfully');
+   });
 
    app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')));
 
@@ -41,7 +50,7 @@ async function bootstrap() {
          },
          store: new RedisStore({
             client: redis,
-
+            prefix: config.getOrThrow<string>('SESSION_FOLDER'),
          }),
       })
    );

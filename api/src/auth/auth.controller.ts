@@ -1,10 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
 import {
    ApiBadRequestResponse,
    ApiConflictResponse,
    ApiOkResponse,
    ApiOperation,
 } from '@nestjs/swagger';
+import { Request } from 'express';
 
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -22,7 +23,7 @@ export class AuthController {
    @ApiBadRequestResponse({ description: 'Некорректные данные для регистрации.' })
    @Post('register')
    @HttpCode(HttpStatus.OK)
-   public async register(@Body() dto: RegisterDto) {
-      return this.authService.register(dto);
+   public async register(@Req() req: Request, @Body() dto: RegisterDto) {
+      return this.authService.register(req, dto);
    }
 }
