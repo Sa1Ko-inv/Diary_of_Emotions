@@ -41,7 +41,6 @@ export class RegisterDto {
    @IsString({ message: 'Пароль должен быть строкой' })
    @IsNotEmpty({ message: 'Пароль обязателен для заполнения' })
    @MinLength(6, { message: 'Пароль должен быть не менее 6 символов' })
-   @MaxLength(20, { message: 'Пароль должен быть не более 20 символов' })
    password: string;
 
    @ApiProperty({
