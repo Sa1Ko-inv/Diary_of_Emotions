@@ -50,18 +50,6 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'Фамилия не может быть пустой' })
   firstName: string;
 
-  @ApiProperty({
-    description: 'Дата рождения пользователя в формате dd/mm/yyyy',
-    example: '09/09/1999',
-    type: String,
-  })
-  @IsNotEmpty({ message: 'Дата рождения не может быть пустой' })
-  @Transform(({ value }) => {
-    const [day, month, year] = value.split('/');
-    return new Date(`${year}-${month}-${day}`);
-  })
-  @IsDate({ message: 'Дата рождения должна быть корректной датой dd/mm/yyyy' })
-  birthDate: Date;
 
   // @IsOptional()
   // entries: object;

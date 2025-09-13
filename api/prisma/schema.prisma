@@ -56,9 +56,8 @@ model User {
   email    String @unique // Email
   password String // Хеш пароля
 
-  firstName String   @map("first_name") // Имя
-  lastName  String   @map("last_name") // Фамилия
-  birthDate DateTime @map("birth_date") // Дата рождения
+  firstName String @map("first_name") // Имя
+  lastName  String @map("last_name") // Фамилия
 
   displayName String  @map("display_name")
   picture     String?

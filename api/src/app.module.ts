@@ -10,6 +10,7 @@ import { IS_DEV_ENV } from './libs/common/utils/is-dev.util';
 import { PrismaModule } from './prisma/prisma.module';
 import { TriggerModule } from './trigger/trigger.module';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UserModule } from './user/user.module';
     TriggerModule,
     EmotionModule,
     EmotionStreakModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
