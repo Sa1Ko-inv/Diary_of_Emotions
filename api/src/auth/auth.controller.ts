@@ -11,6 +11,7 @@ import {Request, Response} from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import {Recaptcha} from "@nestlab/google-recaptcha";
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +24,7 @@ export class AuthController {
    @ApiOkResponse({ description: 'Пользователь успешно зарегистрирован.' })
    @ApiConflictResponse({ description: 'Пользователь с таким email уже существует.' })
    @ApiBadRequestResponse({ description: 'Некорректные данные для регистрации.' })
+   @Recaptcha()
    @Post('register')
    @HttpCode(HttpStatus.OK)
    public async register(@Req() req: Request, @Body() dto: RegisterDto) {
@@ -37,6 +39,7 @@ export class AuthController {
    @ApiConflictResponse({ description: 'Пользователь с таким email уже существует.' })
    @ApiBadRequestResponse({ description: 'Неверный email или пароль.' })
    @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
+   @Recaptcha()
    @Post('login')
    @HttpCode(HttpStatus.OK)
    public async login(@Req() req: Request, @Body() dto: LoginDto) {

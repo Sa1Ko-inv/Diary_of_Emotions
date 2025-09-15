@@ -1,6 +1,6 @@
 import { applyDecorators, UseGuards } from '@nestjs/common';
 
-import { AuthGuard } from '../guard/auth.guard';
+import { AuthGuard } from '../guards/auth.guard';
 
 export function Authorization() {
    return applyDecorators(UseGuards(AuthGuard));
