@@ -7,100 +7,100 @@ import { UpdateEmotionDto } from './dto/update-emotion.dto';
 
 @Injectable()
 export class EmotionService {
-  constructor(private readonly prismaService: PrismaService) {}
+   constructor(private readonly prismaService: PrismaService) {}
 
-  // create(createEmotionDto: CreateEmotionDto) {
-  //   return 'This action adds a new emotion';
-  // }
+   // create(createEmotionDto: CreateEmotionDto) {
+   //   return 'This action adds a new emotion';
+   // }
 
-  async findAllGroup() {
-    const emotions = await this.prismaService.emotionGroup.findMany({
-      orderBy: {
-        name: 'asc',
-      },
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        types: {
-          select: {
-            id: true,
-            name: true,
-            groupId: true,
-          },
-        },
-      },
-    });
-
-    return emotions;
-  }
-
-  async findAllTypes() {
-    const emotionsTypes = await this.prismaService.emotionType.findMany({
-      orderBy: {
-        name: 'asc',
-      },
-      select: {
-        id: true,
-        name: true,
-        groupId: true,
-        group: {
-          select: {
+   async findAllGroup() {
+      const emotions = await this.prismaService.emotionGroup.findMany({
+         orderBy: {
+            name: 'asc',
+         },
+         select: {
             id: true,
             name: true,
             color: true,
-          },
-        },
-      },
-    });
+            types: {
+               select: {
+                  id: true,
+                  name: true,
+                  groupId: true,
+               },
+            },
+         },
+      });
 
-    return emotionsTypes;
-  }
+      return emotions;
+   }
 
-  findOneGroups(id: string) {
-    const emotionGroup = this.prismaService.emotionGroup.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        color: true,
-        types: {
-          select: {
+   async findAllTypes() {
+      const emotionsTypes = await this.prismaService.emotionType.findMany({
+         orderBy: {
+            name: 'asc',
+         },
+         select: {
             id: true,
             name: true,
             groupId: true,
-          },
-        },
-      },
-    });
-    return emotionGroup;
-  }
+            group: {
+               select: {
+                  id: true,
+                  name: true,
+                  color: true,
+               },
+            },
+         },
+      });
 
-  findOneTypes(id: string) {
-    const emotionType = this.prismaService.emotionType.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        groupId: true,
-        group: {
-          select: {
+      return emotionsTypes;
+   }
+
+   findOneGroups(id: string) {
+      const emotionGroup = this.prismaService.emotionGroup.findUnique({
+         where: { id },
+         select: {
             id: true,
             name: true,
             color: true,
-          },
-        },
-      },
-    });
-    return emotionType;
-  }
+            types: {
+               select: {
+                  id: true,
+                  name: true,
+                  groupId: true,
+               },
+            },
+         },
+      });
+      return emotionGroup;
+   }
 
-  //
-  // update(id: number, updateEmotionDto: UpdateEmotionDto) {
-  //   return `This action updates a #${id} emotion`;
-  // }
-  //
-  // remove(id: number) {
-  //   return `This action removes a #${id} emotion`;
-  // }
+   findOneTypes(id: string) {
+      const emotionType = this.prismaService.emotionType.findUnique({
+         where: { id },
+         select: {
+            id: true,
+            name: true,
+            groupId: true,
+            group: {
+               select: {
+                  id: true,
+                  name: true,
+                  color: true,
+               },
+            },
+         },
+      });
+      return emotionType;
+   }
+
+   //
+   // update(id: number, updateEmotionDto: UpdateEmotionDto) {
+   //   return `This action updates a #${id} emotion`;
+   // }
+   //
+   // remove(id: number) {
+   //   return `This action removes a #${id} emotion`;
+   // }
 }

@@ -25,6 +25,4 @@ export class UpdateUserDto {
    // @IsNotEmpty({ message: 'Имя обязательно для заполнения' })
    // @IsString({ message: 'Имя должно быть строкой' })
    displayName: string;
-
-
 }

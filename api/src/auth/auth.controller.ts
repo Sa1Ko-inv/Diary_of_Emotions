@@ -6,12 +6,12 @@ import {
    ApiOkResponse,
    ApiOperation,
 } from '@nestjs/swagger';
-import {Request, Response} from 'express';
+import { Recaptcha } from '@nestlab/google-recaptcha';
+import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import {Recaptcha} from "@nestlab/google-recaptcha";
 
 @Controller('auth')
 export class AuthController {

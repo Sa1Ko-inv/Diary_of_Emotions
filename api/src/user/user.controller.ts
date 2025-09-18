@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch } from '@nestjs/common';
 import {
    ApiNotFoundResponse,
    ApiOkResponse,
@@ -7,11 +7,11 @@ import {
    ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { Authorization } from '../auth/decorators/auth.decorator';
 import { Authorized } from '../auth/decorators/authorized.decorator';
 
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
-import {Authorization} from "../auth/decorators/auth.decorator";
 
 // Пример авторизации и аутентификации показан в findAll
 

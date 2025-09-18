@@ -21,7 +21,7 @@ export class RegisterDto {
    })
    @IsString({ message: 'Имя должно быть строкой' })
    @IsNotEmpty({ message: 'Имя обязательно для заполнения' })
-   name: string
+   name: string;
 
    @ApiProperty({
       description: 'Электронная почта пользователя',

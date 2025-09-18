@@ -10,294 +10,294 @@ import { UpdateEntryDto } from './dto/update-entry.dto';
 
 @Injectable()
 export class EntryService {
-  constructor(private readonly prismaService: PrismaService) {}
+   constructor(private readonly prismaService: PrismaService) {}
 
-  // TODO разобраться как работает создание записи
-  async create(userId: string, dto: CreateEntryDto): Promise<Entry> {
-    const { date, description, emotions, triggers } = dto;
+   // TODO разобраться как работает создание записи
+   async create(userId: string, dto: CreateEntryDto): Promise<Entry> {
+      const { date, description, emotions, triggers } = dto;
 
-    const entry = await this.prismaService.entry.create({
-      data: {
-        userId,
-        date: date ? new Date(date) : new Date(),
-        description,
-        emotions: {
-          create: emotions.map(emotion => ({
-            emotion: {
-              connect: { id: emotion.emotionTypeId },
-            },
-            intensity: emotion.intensity,
-          })),
-        },
-        triggers: {
-          create: await Promise.all(
-            triggers.map(async label => {
-              // Нормализуем label
-              const normalizedLabel = label.trim().toLowerCase();
-
-              // Проверяем, существует ли триггер
-              const existing = await this.prismaService.trigger.findFirst({
-                where: {
-                  label: { equals: normalizedLabel, mode: 'insensitive' },
-                  OR: [{ createdBy: null }, { createdBy: userId }],
-                },
-              });
-
-              // Если нет — создаем
-              const trigger =
-                existing ??
-                (await this.prismaService.trigger.create({
-                  data: {
-                    label: label, // Сохраняем оригинальный label
-                    createdBy: userId,
+      const entry = await this.prismaService.entry.create({
+         data: {
+            userId,
+            date: date ? new Date(date) : new Date(),
+            description,
+            emotions: {
+               create: emotions.map(emotion => ({
+                  emotion: {
+                     connect: { id: emotion.emotionTypeId },
                   },
-                }));
-
-              return {
-                trigger: {
-                  connect: { id: trigger.id },
-                },
-              };
-            })
-          ),
-        },
-      },
-      include: {
-        emotions: {
-          include: {
-            emotion: {
-              include: { group: true },
+                  intensity: emotion.intensity,
+               })),
             },
-          },
-        },
-        triggers: {
-          include: {
-            trigger: true,
-          },
-        },
-      },
-    });
+            triggers: {
+               create: await Promise.all(
+                  triggers.map(async label => {
+                     // Нормализуем label
+                     const normalizedLabel = label.trim().toLowerCase();
 
-    // ✅ Обновляем стрики
-    for (const entryEmotion of entry.emotions) {
-      const groupId = entryEmotion.emotion.group.id;
+                     // Проверяем, существует ли триггер
+                     const existing = await this.prismaService.trigger.findFirst({
+                        where: {
+                           label: { equals: normalizedLabel, mode: 'insensitive' },
+                           OR: [{ createdBy: null }, { createdBy: userId }],
+                        },
+                     });
 
-      await this.prismaService.$transaction(async tx => {
-        const streak = await tx.emotionStreak.findUnique({
-          where: {
-            userId_emotionGroupId: {
-              userId,
-              emotionGroupId: groupId,
+                     // Если нет — создаем
+                     const trigger =
+                        existing ??
+                        (await this.prismaService.trigger.create({
+                           data: {
+                              label: label, // Сохраняем оригинальный label
+                              createdBy: userId,
+                           },
+                        }));
+
+                     return {
+                        trigger: {
+                           connect: { id: trigger.id },
+                        },
+                     };
+                  })
+               ),
             },
-          },
-        });
-
-        const today = new Date(entry.date);
-        today.setUTCHours(0, 0, 0, 0);
-        const yesterday = new Date(today);
-        yesterday.setUTCDate(today.getUTCDate() - 1);
-
-        if (!streak) {
-          // Создаем новый стрик
-          await tx.emotionStreak.create({
-            data: {
-              userId,
-              emotionGroupId: groupId,
-              count: 1,
-              lastDate: today,
+         },
+         include: {
+            emotions: {
+               include: {
+                  emotion: {
+                     include: { group: true },
+                  },
+               },
             },
-          });
-        } else {
-          const lastDate = new Date(streak.lastDate);
-          lastDate.setUTCHours(0, 0, 0, 0);
-
-          if (lastDate.getTime() === yesterday.getTime()) {
-            // Продолжаем стрик
-            await tx.emotionStreak.update({
-              where: { id: streak.id },
-              data: {
-                count: streak.count + 1,
-                lastDate: today,
-              },
-            });
-          } else if (lastDate.getTime() !== today.getTime()) {
-            // Если стрик прервался или пропуск дня
-            await tx.emotionStreak.update({
-              where: { id: streak.id },
-              data: {
-                count: 1,
-                lastDate: today,
-              },
-            });
-          }
-          // Если lastDate === today → ничего не делаем
-        }
+            triggers: {
+               include: {
+                  trigger: true,
+               },
+            },
+         },
       });
-    }
 
-    return entry;
-  }
+      // ✅ Обновляем стрики
+      for (const entryEmotion of entry.emotions) {
+         const groupId = entryEmotion.emotion.group.id;
 
-  findAll() {
-    const entries = this.prismaService.entry.findMany({
-      orderBy: {
-        date: 'desc',
-      },
-      include: {
-        emotions: {
-          include: {
-            emotion: {
-              include: {
-                group: true,
-              },
-            },
-          },
-        },
-        triggers: {
-          include: {
-            trigger: true,
-          },
-        },
-      },
-    });
-
-    return plainToInstance(EntryResponseDto, entries);
-  }
-
-  async findOne(id: string) {
-    const entry = await this.prismaService.entry.findUnique({
-      where: { id },
-      include: {
-        emotions: {
-          include: {
-            emotion: {
-              include: {
-                group: true,
-              },
-            },
-          },
-        },
-        triggers: {
-          include: {
-            trigger: {
-              select: {
-                id: true,
-                label: true,
-                createdBy: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    if (!entry) {
-      throw new NotFoundException(`Заметка с таким ${id} не найдена`);
-    }
-
-    return plainToInstance(EntryResponseDto, entry);
-  }
-
-  async update(id: string, dto: UpdateEntryDto): Promise<Entry> {
-    // Проверяем, существует ли запись
-    const entry = await this.findOne(id);
-
-    const { date, description, emotions, triggers } = dto;
-
-    // Подготавливаем данные для обновления
-    const updateData: any = {
-      ...(date && { date: new Date(date) }),
-      ...(description !== undefined && { description }),
-    };
-
-    // Подготавливаем данные для эмоций
-    const emotionsData = emotions
-      ? {
-          // Удаляем старые связи с эмоциями
-          deleteMany: { entryId: id },
-          // Создаем новые связи
-          create: emotions.map(emotion => ({
-            emotion: {
-              connect: { id: emotion.emotionTypeId },
-            },
-            intensity: emotion.intensity,
-          })),
-        }
-      : {};
-
-    // Подготавливаем данные для триггеров
-    const triggersData = triggers
-      ? {
-          // Удаляем старые связи с триггерами
-          deleteMany: { entryId: id },
-          // Создаем новые связи
-          create: await Promise.all(
-            triggers.map(async label => {
-              // Нормализуем label, приводя к нижнему регистру
-              const normalizedLabel = label.trim().toLowerCase();
-
-              // Ищем существующий триггер
-              const existing = await this.prismaService.trigger.findFirst({
-                where: {
-                  label: { equals: normalizedLabel, mode: 'insensitive' },
-                  OR: [{ createdBy: null }, { createdBy: entry.userId }],
-                },
-              });
-
-              // Если триггер не существует, создаем новый
-              const trigger =
-                existing ??
-                (await this.prismaService.trigger.create({
-                  data: {
-                    label, // Сохраняем оригинальный label
-                    createdBy: entry.userId,
+         await this.prismaService.$transaction(async tx => {
+            const streak = await tx.emotionStreak.findUnique({
+               where: {
+                  userId_emotionGroupId: {
+                     userId,
+                     emotionGroupId: groupId,
                   },
-                }));
+               },
+            });
 
-              return {
-                trigger: {
-                  connect: { id: trigger.id },
-                },
-              };
-            })
-          ),
-        }
-      : {};
+            const today = new Date(entry.date);
+            today.setUTCHours(0, 0, 0, 0);
+            const yesterday = new Date(today);
+            yesterday.setUTCDate(today.getUTCDate() - 1);
 
-    // Выполняем обновление записи
-    const updatedEntry = await this.prismaService.entry.update({
-      where: { id },
-      data: {
-        ...updateData,
-        emotions: emotionsData,
-        triggers: triggersData,
-      },
-      include: {
-        emotions: {
-          include: {
-            emotion: {
-              include: {
-                group: true,
-              },
+            if (!streak) {
+               // Создаем новый стрик
+               await tx.emotionStreak.create({
+                  data: {
+                     userId,
+                     emotionGroupId: groupId,
+                     count: 1,
+                     lastDate: today,
+                  },
+               });
+            } else {
+               const lastDate = new Date(streak.lastDate);
+               lastDate.setUTCHours(0, 0, 0, 0);
+
+               if (lastDate.getTime() === yesterday.getTime()) {
+                  // Продолжаем стрик
+                  await tx.emotionStreak.update({
+                     where: { id: streak.id },
+                     data: {
+                        count: streak.count + 1,
+                        lastDate: today,
+                     },
+                  });
+               } else if (lastDate.getTime() !== today.getTime()) {
+                  // Если стрик прервался или пропуск дня
+                  await tx.emotionStreak.update({
+                     where: { id: streak.id },
+                     data: {
+                        count: 1,
+                        lastDate: today,
+                     },
+                  });
+               }
+               // Если lastDate === today → ничего не делаем
+            }
+         });
+      }
+
+      return entry;
+   }
+
+   findAll() {
+      const entries = this.prismaService.entry.findMany({
+         orderBy: {
+            date: 'desc',
+         },
+         include: {
+            emotions: {
+               include: {
+                  emotion: {
+                     include: {
+                        group: true,
+                     },
+                  },
+               },
             },
-          },
-        },
-        triggers: {
-          include: {
-            trigger: true,
-          },
-        },
-      },
-    });
+            triggers: {
+               include: {
+                  trigger: true,
+               },
+            },
+         },
+      });
 
-    return updatedEntry;
-  }
+      return plainToInstance(EntryResponseDto, entries);
+   }
 
-  async remove(id: string) {
-    const entry = await this.findOne(id);
+   async findOne(id: string) {
+      const entry = await this.prismaService.entry.findUnique({
+         where: { id },
+         include: {
+            emotions: {
+               include: {
+                  emotion: {
+                     include: {
+                        group: true,
+                     },
+                  },
+               },
+            },
+            triggers: {
+               include: {
+                  trigger: {
+                     select: {
+                        id: true,
+                        label: true,
+                        createdBy: true,
+                     },
+                  },
+               },
+            },
+         },
+      });
+      if (!entry) {
+         throw new NotFoundException(`Заметка с таким ${id} не найдена`);
+      }
 
-    await this.prismaService.entry.delete({
-      where: { id: entry.id },
-    });
-    return { message: `Запись с ID ${id} успешно удалена` };
-  }
+      return plainToInstance(EntryResponseDto, entry);
+   }
+
+   async update(id: string, dto: UpdateEntryDto): Promise<Entry> {
+      // Проверяем, существует ли запись
+      const entry = await this.findOne(id);
+
+      const { date, description, emotions, triggers } = dto;
+
+      // Подготавливаем данные для обновления
+      const updateData: any = {
+         ...(date && { date: new Date(date) }),
+         ...(description !== undefined && { description }),
+      };
+
+      // Подготавливаем данные для эмоций
+      const emotionsData = emotions
+         ? {
+              // Удаляем старые связи с эмоциями
+              deleteMany: { entryId: id },
+              // Создаем новые связи
+              create: emotions.map(emotion => ({
+                 emotion: {
+                    connect: { id: emotion.emotionTypeId },
+                 },
+                 intensity: emotion.intensity,
+              })),
+           }
+         : {};
+
+      // Подготавливаем данные для триггеров
+      const triggersData = triggers
+         ? {
+              // Удаляем старые связи с триггерами
+              deleteMany: { entryId: id },
+              // Создаем новые связи
+              create: await Promise.all(
+                 triggers.map(async label => {
+                    // Нормализуем label, приводя к нижнему регистру
+                    const normalizedLabel = label.trim().toLowerCase();
+
+                    // Ищем существующий триггер
+                    const existing = await this.prismaService.trigger.findFirst({
+                       where: {
+                          label: { equals: normalizedLabel, mode: 'insensitive' },
+                          OR: [{ createdBy: null }, { createdBy: entry.userId }],
+                       },
+                    });
+
+                    // Если триггер не существует, создаем новый
+                    const trigger =
+                       existing ??
+                       (await this.prismaService.trigger.create({
+                          data: {
+                             label, // Сохраняем оригинальный label
+                             createdBy: entry.userId,
+                          },
+                       }));
+
+                    return {
+                       trigger: {
+                          connect: { id: trigger.id },
+                       },
+                    };
+                 })
+              ),
+           }
+         : {};
+
+      // Выполняем обновление записи
+      const updatedEntry = await this.prismaService.entry.update({
+         where: { id },
+         data: {
+            ...updateData,
+            emotions: emotionsData,
+            triggers: triggersData,
+         },
+         include: {
+            emotions: {
+               include: {
+                  emotion: {
+                     include: {
+                        group: true,
+                     },
+                  },
+               },
+            },
+            triggers: {
+               include: {
+                  trigger: true,
+               },
+            },
+         },
+      });
+
+      return updatedEntry;
+   }
+
+   async remove(id: string) {
+      const entry = await this.findOne(id);
+
+      await this.prismaService.entry.delete({
+         where: { id: entry.id },
+      });
+      return { message: `Запись с ID ${id} успешно удалена` };
+   }
 }

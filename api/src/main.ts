@@ -32,6 +32,7 @@ async function bootstrap() {
 
    app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
+   // FIXME: Перейти на новую версию Redis и так далее
    app.use(
       session({
          secret: config.getOrThrow<string>('SESSION_SECRET'),
