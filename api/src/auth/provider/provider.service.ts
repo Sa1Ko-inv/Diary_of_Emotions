@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { ProviderOptionsSymbol, TypeOptions } from './provider.constants';
-import { BaseOAuthService } from './services/base-o-auth.service';
+import { BaseOauthService } from './services/base-oauth.service';
 
 @Injectable()
 export class ProviderService implements OnModuleInit {
@@ -13,7 +13,7 @@ export class ProviderService implements OnModuleInit {
       }
    }
 
-   public findByService(service: string): BaseOAuthService | null {
+   public findByService(service: string): BaseOauthService | null {
       return this.options.services.find(s => s.name === service) ?? null;
    }
 }

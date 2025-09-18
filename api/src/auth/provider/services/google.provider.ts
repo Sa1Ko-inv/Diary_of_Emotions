@@ -1,8 +1,8 @@
-import { BaseOAuthService } from './base-o-auth.service';
+import { BaseOauthService } from './base-oauth.service';
 import { TypeProviderOptions } from './types/provider-options.types';
 import { TypeUserInfo } from './types/user-info.types';
 
-export class GoogleProvider extends BaseOAuthService {
+export class GoogleProvider extends BaseOauthService {
    public constructor(options: TypeProviderOptions) {
       super({
          name: 'google',

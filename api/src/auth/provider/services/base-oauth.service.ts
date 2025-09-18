@@ -8,7 +8,7 @@ import { TypeUserInfo } from './types/user-info.types'
 import { TypeBaseProviderOptions } from './types/base-provider.options.types';
 
 @Injectable()
-export class BaseOAuthService {
+export class BaseOauthService {
    private BASE_URL: string
 
    public constructor(private readonly options: TypeBaseProviderOptions) {}
