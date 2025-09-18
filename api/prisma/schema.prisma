@@ -106,6 +106,8 @@ model Token {
 
   expiresIn DateTime @map("expires_in") // Время истечения токена
 
+  createdAt DateTime @default(now()) @map("created_at")
+
   @@map("tokens")
 }
 
