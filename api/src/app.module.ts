@@ -12,6 +12,8 @@ import { IS_DEV_ENV } from './libs/common/utils/is-dev.util';
 import { PrismaModule } from './prisma/prisma.module';
 import { TriggerModule } from './trigger/trigger.module';
 import { UserModule } from './user/user.module';
+import { MailModule } from './libs/mail/mail.module';
+import { EmailConfirmationModule } from './auth/email-confirmation/email-confirmation.module';
 
 @Module({
    imports: [
@@ -29,6 +31,8 @@ import { UserModule } from './user/user.module';
       EmotionStreakModule,
       AuthModule,
       ProviderModule,
+      MailModule,
+      EmailConfirmationModule,
    ],
    controllers: [AppController],
    providers: [AppService],
