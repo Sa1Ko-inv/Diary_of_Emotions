@@ -37,6 +37,7 @@ export class EmailConfirmationService {
          );
       }
 
+      // Проверяем, не истек ли токен
       const hasExpired = new Date(existingToken.expiresIn) < new Date();
 
       if (hasExpired) {
@@ -45,11 +46,12 @@ export class EmailConfirmationService {
          );
       }
 
+      // Проверка на существование пользователя с данным email
       const existingUser = await this.userService.findByEmail(existingToken.email);
 
       if (!existingUser) {
          throw new NotFoundException(
-            'Пользователь с указанным адресом электронной почты не найден. Пожалуйста, убедитесь, что вы ввели правильный email.'
+            'Пользователь не найден. Пожалуйста, проверьте введенный адрес электронной почты и попробуйте снова.'
          );
       }
 

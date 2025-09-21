@@ -80,11 +80,9 @@ export class AuthController {
          throw new BadRequestException('Не был передан код авторизации.');
       }
 
-
-
       await this.authService.extractProfileFromCode(req, provider, code);
 
-      return res.redirect(`${this.configService.getOrThrow('ALLOWED_ORIGINS')}/dashboard/settings`)
+      return res.redirect(`${this.configService.getOrThrow('ALLOWED_ORIGINS')}/dashboard/settings`);
    }
 
    @UseGuards(AuthProviderGuard)
