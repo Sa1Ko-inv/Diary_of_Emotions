@@ -5,7 +5,7 @@ interface ResetPasswordTemplatePassword {
    domain: string;
    token: string;
 }
-
+// TODO: Сделать стилизацию письма
 export function ResetPasswordTemplate({ domain, token }: ResetPasswordTemplatePassword) {
    const resetLink = `${domain}/auth/new-password?token=${token}`;
 
