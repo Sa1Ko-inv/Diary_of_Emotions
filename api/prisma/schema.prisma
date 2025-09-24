@@ -193,7 +193,7 @@ model EmotionStreak {
   count          Int      @default(0) // Количество подряд идущих дней
   lastDate       DateTime // Дата последней записи
 
-  user    User         @relation(fields: [userId], references: [id])
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   emotion EmotionGroup @relation(fields: [emotionGroupId], references: [id])
 
   @@unique([userId, emotionGroupId]) // уникальный стрик на юзера и эмоцию

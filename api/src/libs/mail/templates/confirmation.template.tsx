@@ -12,45 +12,45 @@ export function ConfirmationTemplate({ domain, token }: ConfirmationTemplateProp
    return (
       <Html>
          <Head />
-         <Preview>Подтверждение почты — Diary of Emotion</Preview>
+         <Preview>Подтверждение электронной почты — Diary of Emotion</Preview>
          <Body style={main}>
             <Container style={container}>
-               {/* Баннер сверху */}
                <Section style={logoSection}>
                   <Img
-                     src="https://drive.google.com/uc?export=view&id=1O6WxhrfuJ5EmgJTPkSCrna7NNkmJvJih"
+                     src="https://8upload.com/image/68d43b7c20a57/Nadpis_mal_bez_vod.png"
                      alt="Diary of Emotion"
                      width="100%"
                      style={banner}
                   />
                </Section>
 
-               <Heading style={h1}>Подтверждение почты</Heading>
+               <Heading style={h1}>Подтверждение электронной почты</Heading>
                <Text style={text}>
-                  Привет! Чтобы подтвердить свой адрес электронной почты, пожалуйста, нажмите на кнопку ниже:
+                  Уважаемый пользователь, для подтверждения вашего адреса электронной почты, пожалуйста, нажмите на кнопку ниже:
                </Text>
 
                <Section style={buttonContainer}>
-                  <Link style={button} href={confirmLink}>Подтвердить почту</Link>
+                  <Link style={button} href={confirmLink}>Подтвердить адрес</Link>
                </Section>
 
                <Text style={textSmall}>
-                  Ссылка действует в течение 1 часа. Если вы не запрашивали подтверждение, просто проигнорируйте это сообщение.
+                  Данная ссылка будет активна в течение 1 часа. Если данное действие не было инициировано вами, пожалуйста, проигнорируйте это сообщение.
                </Text>
 
                <Hr style={hr} />
-               <Text style={footer}>Спасибо за использование Diary of Emotion 💙</Text>
+               <Text style={footer}>Благодарим за использование нашего сервиса,<br/>Команда Diary of Emotion</Text>
             </Container>
          </Body>
       </Html>
    );
 }
 
+
 const main = {
    fontFamily: 'Arial, sans-serif',
    padding: '20px',
    background: '#0f172a',
-   backgroundImage: 'url("https://drive.google.com/uc?export=view&id=1EnCax0q9PNJmJLvgNchfXcPDzUPCyLRL")',
+   backgroundImage: 'url("https://8upload.com/image/68d43956064e4/______________Email.png")',
    backgroundRepeat: 'repeat', // Изображение будет повторяться по всему фону
    backgroundSize: '750px 600px', // Сохранит исходный размер изображения
 };
@@ -62,7 +62,10 @@ const container = {
    backgroundColor: 'rgba(30,41,59,0.9)', // слегка прозрачный фон
    borderRadius: '12px',
    maxWidth: '600px',
-   boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)', // фиолетовое свечение
+   border: '1px solid rgba(139, 92, 246, 0.5)',
+   backgroundImage: `
+      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0) 70%)
+   `,
 };
 
 const logoSection = {
