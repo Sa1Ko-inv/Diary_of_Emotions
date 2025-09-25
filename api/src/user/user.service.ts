@@ -65,6 +65,35 @@ export class UserService {
       return user;
    }
 
+   // TODO: Сделать защиту от изменения email на уже существующий, а также загрузку картинки
+   public async update(userId: string, dto: UpdateUserDto) {
+      const user = await this.findById(userId)
+
+      const password = dto.password
+         ? await hash(dto.password, {
+            memoryCost: 2 ** 16, // 64 MB
+            timeCost: 3, // Количество итераций
+            parallelism: 1, // Параллельность
+         })
+         : user.password;
+
+      const updatedUser = await this.prismaService.user.update({
+
+         where: {
+            id: user.id
+         },
+         data: {
+            email: dto.email ?? user.email,
+            displayName: dto.name ?? user.displayName,
+            isTwoFactorEnabled: dto.isTwoFactorEnabled ?? user.isTwoFactorEnabled,
+            picture: dto.picture ?? user.picture,
+            password: password
+         }
+      })
+
+      return updatedUser;
+   }
+
    //
    // async findAll() {
    //    const user = await this.prismaService.user.findMany({
@@ -84,51 +113,26 @@ export class UserService {
    //    return plainToInstance(UserResponseDto, user);
    // }
    //
-   async findOne(id: string) {
-      const user = await this.prismaService.user.findUnique({
-         where: { id },
-         select: {
-            id: true,
-            email: true,
-            password: true,
-            displayName: true,
-            picture: true,
-            method: true,
-            isVerified: true,
-            createdAt: true,
-         },
-      });
-      if (!user) {
-         throw new NotFoundException(`Пользователь с ID ${id} не найден`);
-      }
-      return plainToInstance(UserResponseDto, user);
-   }
-   //
-   async update(id: string, dto: UpdateUserDto): Promise<User> {
-      const user = await this.findOne(id);
+   // async findOne(id: string) {
+   //    const user = await this.prismaService.user.findUnique({
+   //       where: { id },
+   //       select: {
+   //          id: true,
+   //          email: true,
+   //          password: true,
+   //          displayName: true,
+   //          picture: true,
+   //          method: true,
+   //          isVerified: true,
+   //          createdAt: true,
+   //       },
+   //    });
+   //    if (!user) {
+   //       throw new NotFoundException(`Пользователь с ID ${id} не найден`);
+   //    }
+   //    return plainToInstance(UserResponseDto, user);
+   // }
 
-      const password = dto.password
-         ? await hash(dto.password, {
-              memoryCost: 2 ** 16, // 64 MB
-              timeCost: 3, // Количество итераций
-              parallelism: 1, // Параллельность
-           })
-         : user.password;
-
-      const updatedUser = await this.prismaService.user.update({
-         where: { id: user.id },
-         data: {
-            email: dto.email ?? user.email,
-            password,
-            displayName: dto.displayName ?? user.displayName,
-            // picture: dto.picture ?? user.picture,
-            // method: dto.method ?? user.method,
-            // isVerified: dto.isVerified ?? user.isVerified,
-         },
-      });
-
-      return updatedUser;
-   }
    //
    // async remove(id: string) {
    //    const user = await this.findOne(id);

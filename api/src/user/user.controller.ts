@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch } from '@nestjs/common';
 import {
    ApiNotFoundResponse,
    ApiOkResponse,
@@ -27,6 +27,21 @@ export class UserController {
       return this.userService.findById(userId);
    }
 
+   @Authorization()
+   @ApiOperation({
+      summary: 'Обновление пользователя',
+      description:
+         'Позволяет обновить информацию о пользователе по его уникальному идентификатору.',
+   })
+   @ApiOkResponse({ description: 'Пользователь успешно обновлен.' })
+   @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
+   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован.' })
+   @HttpCode(HttpStatus.OK)
+   @Patch('profile')
+   public async updateProfile(@Authorized('id') userId: string, @Body() dto: UpdateUserDto) {
+      return this.userService.update(userId, dto);
+   }
+
    // @ApiOperation({
    //    summary: 'Получение всех пользователей',
    //    description: 'Возвращает список всех зарегистрированных пользователей.',
@@ -38,32 +53,19 @@ export class UserController {
    //    return { id };
    // }
    //
-   @Authorization()
-   @ApiOperation({
-      summary: 'Получение пользователя по ID',
-      description: 'Возвращает информацию о пользователе по его уникальному идентификатору.',
-   })
-   @ApiOkResponse({ description: 'Пользователь успешно найден.' })
-   @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
-   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован.' })
-   @Get(':id')
-   findOne(@Param('id') id: string) {
-      return this.userService.findOne(id);
-   }
+   // @Authorization()
+   // @ApiOperation({
+   //    summary: 'Получение пользователя по ID',
+   //    description: 'Возвращает информацию о пользователе по его уникальному идентификатору.',
+   // })
+   // @ApiOkResponse({ description: 'Пользователь успешно найден.' })
+   // @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
+   // @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован.' })
+   // @Get(':id')
+   // findOne(@Param('id') id: string) {
+   //    return this.userService.findOne(id);
+   // }
    //
-   @Authorization()
-   @ApiOperation({
-      summary: 'Обновление пользователя',
-      description:
-         'Позволяет обновить информацию о пользователе по его уникальному идентификатору.',
-   })
-   @ApiOkResponse({ description: 'Пользователь успешно обновлен.' })
-   @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
-   @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован.' })
-   @Patch('update/:id')
-   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-      return this.userService.update(id, updateUserDto);
-   }
    //
    // @ApiOperation({
    //    summary: 'Удаление пользователя',
