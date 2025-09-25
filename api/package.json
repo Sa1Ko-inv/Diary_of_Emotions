@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "bd:reset": "npx prisma migrate reset",
     "bd:migrate": "npx prisma migrate dev",
-    "dev": "concurrently -n \"DOCKER,PRISMA,SERVER\" -c \"blue,green,yellow\" \"docker compose up\" \"wait-on tcp:5432 && npx prisma studio\" \"wait-on tcp:5432 && npm run start:dev\""
+    "dev": "concurrently -n \"PRISMA,SERVER\" -c \"green,yellow\" \"npx prisma studio\" \"wait-on tcp:5432 && npm run start:dev\""
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

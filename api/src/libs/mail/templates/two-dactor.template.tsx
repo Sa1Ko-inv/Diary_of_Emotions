@@ -1,18 +1,15 @@
 import { Body, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text } from '@react-email/components';
 import * as React from 'react';
 
-interface ConfirmationTemplateProps {
-   domain: string;
+interface TwoFactorAuthTemplateProps {
    token: string;
 }
 
-export function ConfirmationTemplate({ domain, token }: ConfirmationTemplateProps) {
-   const confirmLink = `${domain}/auth/new-verification?token=${token}`;
-
+export function TwoFactorAuthTemplate({ token }: TwoFactorAuthTemplateProps) {
    return (
       <Html>
          <Head />
-         <Preview>Подтверждение электронной почты — Diary of Emotion</Preview>
+         <Preview>Активация двухфакторной аутентификации — Diary of Emotion</Preview>
          <Body style={main}>
             <Container style={container}>
                <Section style={logoSection}>
@@ -24,21 +21,21 @@ export function ConfirmationTemplate({ domain, token }: ConfirmationTemplateProp
                   />
                </Section>
 
-               <Heading style={h1}>Подтверждение электронной почты</Heading>
+               <Heading style={h1}>Двухфакторная аутентификации</Heading>
                <Text style={text}>
-                  Уважаемый пользователь, для подтверждения вашего адреса электронной почты, пожалуйста, нажмите на кнопку ниже:
+                  Ваш код для двухфакторной аутентификации: <strong>{token}</strong>
                </Text>
 
-               <Section style={buttonContainer}>
-                  <Link style={button} href={confirmLink}>Подтвердить адрес</Link>
-               </Section>
+               <Text style={text}>
+                  Пожалуйста, введите этот код в приложении для завершения процесса аутентификации.
+               </Text>
 
                <Text style={textSmall}>
-                  Данная ссылка будет активна в течение 1 часа. Если данное действие не было инициировано вами, пожалуйста, проигнорируйте это сообщение.
+                  Если данное действие не было инициировано вами, пожалуйста, проигнорируйте это сообщение.
                </Text>
 
                <Hr style={hr} />
-               <Text style={footer}>Благодарим за использование нашего сервиса,<br/>Команда Diary of Emotion💙</Text>
+               <Text style={footer}>Благодарим за использование нашего сервиса,<br />Команда Diary of Emotion💙</Text>
             </Container>
          </Body>
       </Html>
