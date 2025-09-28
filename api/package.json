@@ -19,8 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "bd:reset": "npx prisma migrate reset",
-    "bd:migrate": "npx prisma migrate dev",
-    "dev": "concurrently -n \"PRISMA,SERVER\" -c \"green,yellow\" \"npx prisma studio\" \"wait-on tcp:5432 && npm run start:dev\""
+    "bd:migrate": "npx prisma migrate dev"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -35,6 +34,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-socket.io": "^11.1.6",
+    "@nestjs/serve-static": "^5.0.3",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/websockets": "^11.1.6",
     "@nestlab/google-recaptcha": "^3.10.0",
@@ -49,6 +49,7 @@
     "cookie-parser": "^1.4.7",
     "express-session": "^1.18.2",
     "ioredis": "^5.7.0",
+    "multer": "^2.0.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
@@ -67,6 +68,7 @@
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.2",
     "@types/jest": "^29.5.14",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",
     "@types/nodemailer": "^7.0.1",
     "@types/passport": "^1.0.17",

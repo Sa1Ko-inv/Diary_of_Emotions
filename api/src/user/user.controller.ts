@@ -1,17 +1,33 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch } from '@nestjs/common';
 import {
-   ApiNotFoundResponse,
-   ApiOkResponse,
-   ApiOperation,
-   ApiTags,
-   ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
+   Body,
+   Controller,
+   FileTypeValidator,
+   Get,
+   HttpCode,
+   HttpStatus,
+   MaxFileSizeValidator,
+   ParseFilePipe,
+   Patch,
+   UploadedFile,
+   UseInterceptors,
+} from '@nestjs/common';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+
+
 
 import { Authorization } from '../auth/decorators/auth.decorator';
 import { Authorized } from '../auth/decorators/authorized.decorator';
 
+
+
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { User } from '@prisma/client';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+
+
+
 
 // Пример авторизации и аутентификации показан в findAll
 
@@ -37,9 +53,28 @@ export class UserController {
    @ApiNotFoundResponse({ description: 'Пользователь не найден.' })
    @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован.' })
    @HttpCode(HttpStatus.OK)
+   @UseInterceptors(FileInterceptor('picture'))
    @Patch('profile')
-   public async updateProfile(@Authorized('id') userId: string, @Body() dto: UpdateUserDto) {
-      return this.userService.update(userId, dto);
+   public async updateProfile(
+      @Authorized('id') userId:string,
+      @Body() dto: UpdateUserDto,
+      @UploadedFile(
+         new ParseFilePipe({
+            fileIsRequired: false,
+            validators: [
+               new FileTypeValidator({
+                  fileType: 'image/(jpeg|jpg|png|webp)',
+               }),
+               new MaxFileSizeValidator({
+                  maxSize: 5 * 1000 * 1000,
+                  message: 'Максимальный размер файла 5MB',
+               }),
+            ],
+         })
+      )
+      picture?: Express.Multer.File,
+   ) {
+      return this.userService.update(userId, dto, picture);
    }
 
    // @ApiOperation({

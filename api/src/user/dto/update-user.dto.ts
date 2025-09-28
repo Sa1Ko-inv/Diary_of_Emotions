@@ -7,6 +7,7 @@ export class UpdateUserDto {
       example: 'John Doe',
       type: String,
    })
+   @IsOptional()
    @IsString({ message: 'Имя должно быть строкой' })
    name?: string;
 
@@ -38,7 +39,7 @@ export class UpdateUserDto {
    })
    @IsOptional()
    @IsString({ message: 'Картинка профиля должна быть строкой' })
-   picture?: string;
+   picture?: Express.Multer.File;
 
    @ApiProperty({
       description: 'Включена ли двухфакторная аутентификация',

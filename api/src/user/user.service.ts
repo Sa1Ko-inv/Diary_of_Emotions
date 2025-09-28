@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AuthMethod, User } from '@prisma/client';
 import { hash } from 'argon2';
-import { plainToInstance } from 'class-transformer';
 
 import { PrismaService } from '../prisma/prisma.service';
 
-import { UserResponseDto } from './dto/response-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+
+import * as path from 'path'
+import * as fs from 'node:fs';
+import { cwd } from 'process';
 
 @Injectable()
 export class UserService {
@@ -66,32 +68,70 @@ export class UserService {
    }
 
    // TODO: Сделать защиту от изменения email на уже существующий, а также загрузку картинки
-   public async update(userId: string, dto: UpdateUserDto) {
-      const user = await this.findById(userId)
+   public async update(userId: string, dto: UpdateUserDto, picture?: Express.Multer.File) {
+      const user = await this.findById(userId);
 
       const password = dto.password
          ? await hash(dto.password, {
-            memoryCost: 2 ** 16, // 64 MB
-            timeCost: 3, // Количество итераций
-            parallelism: 1, // Параллельность
-         })
+              memoryCost: 2 ** 16, // 64 MB
+              timeCost: 3, // Количество итераций
+              parallelism: 1, // Параллельность
+           })
          : user.password;
 
-      const updatedUser = await this.prismaService.user.update({
+      let picturePath = user.picture;
+      if (picture) {
+         picturePath = await this.updatePicturePath(user, picture);
+      }
 
+      console.log(picturePath);
+
+      const updatedUser = await this.prismaService.user.update({
          where: {
-            id: user.id
+            id: user.id,
          },
          data: {
             email: dto.email ?? user.email,
             displayName: dto.name ?? user.displayName,
             isTwoFactorEnabled: dto.isTwoFactorEnabled ?? user.isTwoFactorEnabled,
-            picture: dto.picture ?? user.picture,
-            password: password
-         }
-      })
+            picture: picturePath,
+            password: password,
+         },
+      });
 
       return updatedUser;
+   }
+
+   private async updatePicturePath(user: User, picture: Express.Multer.File) {
+      const uploadedDir = path.join(cwd(), '/src', '/user', 'uploadedPictures');
+      const pictureName = `${Date.now()}_${picture.originalname}`;
+      const picturePath = path.join(uploadedDir, pictureName);
+      const pictureUrl = `/pictures/${pictureName}`;
+
+      // Если у пользователя есть картинка, удаляем старый файл
+      if (user.picture) {
+         const oldPath = path.join(uploadedDir, path.basename(user.picture));
+         if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath);
+         }
+      }
+
+
+      // Создаем директорию, если она не существует
+      if (!fs.existsSync(uploadedDir)) {
+         fs.mkdirSync(uploadedDir, { recursive: true });
+      }
+
+      // Сохраняем новый файл
+      await fs.writeFileSync(picturePath, picture.buffer);
+
+      // Обновляем путь к картинке в базе данных
+      await this.prismaService.user.update({
+         where: { id: user.id },
+         data: { picture: pictureUrl }
+      });
+
+      return pictureUrl;
    }
 
    //

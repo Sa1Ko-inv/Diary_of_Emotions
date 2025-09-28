@@ -16,6 +16,10 @@ import { MailModule } from './libs/mail/mail.module';
 import { EmailConfirmationModule } from './auth/email-confirmation/email-confirmation.module';
 import {  PasswordRecoveryModule } from './auth/password-recovery/password-recovery.module';
 import { TwoFactorAuthModule } from './auth/two-factor-auth/two-factor-auth.module';
+// import { PictureModule } from './user/picture/picture.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import * as path from 'path';
+import { cwd } from 'process';
 
 @Module({
    imports: [
@@ -24,6 +28,10 @@ import { TwoFactorAuthModule } from './auth/two-factor-auth/two-factor-auth.modu
          isGlobal: true,
          cache: true,
          expandVariables: true,
+      }),
+      ServeStaticModule.forRoot({
+         rootPath: path.join(cwd(), 'src', 'user', 'uploadedPictures'),
+         serveRoot: '/pictures',
       }),
       PrismaModule,
       UserModule,
@@ -37,6 +45,7 @@ import { TwoFactorAuthModule } from './auth/two-factor-auth/two-factor-auth.modu
       EmailConfirmationModule,
       PasswordRecoveryModule,
       TwoFactorAuthModule,
+      // PictureModule,
    ],
    controllers: [AppController],
    providers: [AppService],
